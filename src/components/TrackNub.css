@@ -2,11 +2,11 @@
   position: fixed;
   bottom: 0;
   right: 0;
-  width: 100px;
-  height: 100px;
+  width: 110px;
+  height: 110px;
   z-index: 150;
   background: #0a0a0a;
-  border-radius: 50% 0 0 0;
+  border-radius: 55px 0 0 0;
   padding: 25px;
   box-shadow: 
     0 0 0 2px #1a1a1a,
@@ -29,8 +29,8 @@
 
 .track-nub {
   position: relative;
-  width: 30px;
-  height: 30px;
+  width: 50px;
+  height: 50px;
   cursor: pointer;
   transition: transform 0.08s ease-out;
   user-select: none;
@@ -44,9 +44,9 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 40px;
-  height: 40px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  width: 65px;
+  height: 65px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
   border-radius: 50%;
   pointer-events: none;
   opacity: 0;
@@ -63,46 +63,112 @@
   height: 100%;
   border-radius: 50%;
   background: #1a1a1a;
-  box-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.5),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.4);
   overflow: hidden;
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.6),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.8),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
 }
 
+/* PS5-style rubber texture */
 .nub-texture {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: #1a1a1a;
+  border-radius: 50%;
+  background: 
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 70% 70%, rgba(0, 0, 0, 0.1) 0%, transparent 50%);
+}
+
+/* Micro-texture pattern */
+.nub-texture::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 1px,
+      rgba(255, 255, 255, 0.02) 1px,
+      rgba(255, 255, 255, 0.02) 2px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 1px,
+      rgba(0, 0, 0, 0.05) 1px,
+      rgba(0, 0, 0, 0.05) 2px
+    );
   border-radius: 50%;
 }
 
+/* Center divot */
+.nub-texture::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0a0a0a;
+  box-shadow: 
+    inset 0 1px 2px rgba(0, 0, 0, 0.8),
+    0 0.5px 0.5px rgba(255, 255, 255, 0.1);
+}
+
 .nub-highlight {
-  display: none;
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 35%;
+  height: 35%;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.03) 0%, transparent 60%);
+  border-radius: 50%;
+  filter: blur(1px);
 }
 
 .nub-shadow {
-  display: none;
+  position: absolute;
+  bottom: 5%;
+  right: 5%;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.2) 100%);
+  border-radius: 50%;
+  filter: blur(2px);
 }
 
 .track-nub.pressed .nub-surface {
-  background: #0a0a0a;
+  background: #0f0f0f;
   box-shadow: 
-    inset 0 2px 4px rgba(0, 0, 0, 0.8),
-    0 0 1px rgba(0, 0, 0, 0.5);
+    inset 0 3px 5px rgba(0, 0, 0, 0.9),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.02),
+    0 0 2px rgba(0, 0, 0, 0.5);
 }
 
 @media (max-width: 768px) {
   .track-nub-container {
-    width: 90px;
-    height: 90px;
-    padding: 30px;
+    width: 100px;
+    height: 100px;
+    padding: 25px;
   }
   
   .track-nub {
-    width: 30px;
-    height: 30px;
+    width: 45px;
+    height: 45px;
+  }
+  
+  .track-nub::after {
+    width: 60px;
+    height: 60px;
   }
 }
