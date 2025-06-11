@@ -10,6 +10,8 @@ function App() {
   const [isPressed, setIsPressed] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [isFlipped, setIsFlipped] = useState(false)
+  const [openApp, setOpenApp] = useState<string | null>(null)
+  const [isAnimating, setIsAnimating] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
   const lastNavTimeRef = useRef(0)
   const navCooldown = 200 // ms between navigation
@@ -72,6 +74,23 @@ function App() {
       audioRef.current.currentTime = 0
       audioRef.current.play()
     }
+    
+    // Open app animation
+    if (!openApp && !isAnimating) {
+      setIsAnimating(true)
+      setTimeout(() => {
+        setOpenApp(`app-${selectedIndex}`)
+        setIsAnimating(false)
+      }, 300)
+    } else if (openApp) {
+      // Close app
+      setIsAnimating(true)
+      setTimeout(() => {
+        setOpenApp(null)
+        setIsAnimating(false)
+      }, 300)
+    }
+    
     setTimeout(() => setIsPressed(false), 100)
   }
 
@@ -109,7 +128,12 @@ function App() {
   return (
     <div className="app">
       <PhoneMockup>
-        <MobileOS selectedIndex={selectedIndex} isPressed={isPressed} />
+        <MobileOS 
+          selectedIndex={selectedIndex} 
+          isPressed={isPressed} 
+          openApp={openApp}
+          isAnimating={isAnimating}
+        />
       </PhoneMockup>
       <TrackNub
         onDirectionInput={handleDirectionInput}

@@ -57,8 +57,7 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 15px;
   padding: 20px;
-  padding-bottom: 120px;
-  padding-right: 100px;
+  padding-bottom: 140px;
   overflow-y: auto;
   align-content: start;
 }
@@ -75,14 +74,14 @@
 }
 
 .app-icon-content {
-  width: 55px;
-  height: 55px;
+  width: 60px;
+  height: 60px;
   background: var(--app-color, #555);
   border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
+  font-size: 28px;
   transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
@@ -112,10 +111,10 @@
 
 .dock {
   position: absolute;
-  bottom: 20px;
-  left: 20px;
-  right: 100px;
-  height: 80px;
+  bottom: 40px;
+  left: 15px;
+  right: 15px;
+  height: 70px;
   background: rgba(30, 30, 30, 0.8);
   backdrop-filter: blur(20px);
   border-radius: 20px;
@@ -155,6 +154,96 @@
   }
 }
 
+/* App launch animations */
+.app-icon.launching .app-icon-content {
+  animation: appLaunch 0.3s ease-out forwards;
+}
+
+@keyframes appLaunch {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(10);
+    opacity: 0;
+  }
+}
+
+.app-grid.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dock.hidden {
+  transform: translateY(100px);
+  opacity: 0;
+}
+
+/* App screen */
+.app-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--app-color, #333);
+  display: flex;
+  flex-direction: column;
+  transform: scale(1);
+  opacity: 1;
+  transition: all 0.3s ease;
+}
+
+.app-screen.animating {
+  transform: scale(0.8);
+  opacity: 0;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 50px 20px 20px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.app-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: white;
+}
+
+.app-close {
+  font-size: 24px;
+  color: white;
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+.app-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+
+.app-icon-large {
+  font-size: 120px;
+  margin-bottom: 40px;
+}
+
+.app-content p {
+  font-size: 18px;
+  opacity: 0.8;
+}
+
 @media (max-width: 768px) {
   .mobile-os {
     padding-top: 20px;
@@ -167,28 +256,38 @@
   }
   
   .app-grid {
-    gap: 12px;
-    padding: 15px;
-    padding-bottom: 100px;
-    padding-right: 100px;
+    gap: 10px;
+    padding: 10px;
+    padding-bottom: 150px;
+  }
+  
+  .app-icon {
+    padding: 5px;
   }
   
   .app-icon-content {
-    width: 50px;
-    height: 50px;
-    font-size: 24px;
+    width: calc((100vw - 50px) / 4);
+    height: calc((100vw - 50px) / 4);
+    max-width: 70px;
+    max-height: 70px;
+    font-size: 28px;
+  }
+  
+  .app-name {
+    font-size: 11px;
   }
   
   .dock {
-    bottom: 10px;
+    bottom: 25px;
     left: 10px;
-    right: 110px;
+    right: 200px;
     height: 60px;
+    margin-bottom: env(safe-area-inset-bottom);
   }
   
   .dock-app {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
+    width: 45px;
+    height: 45px;
+    font-size: 22px;
   }
 }

@@ -4,6 +4,8 @@ import './MobileOS.css'
 interface MobileOSProps {
   selectedIndex: number
   isPressed: boolean
+  openApp: string | null
+  isAnimating: boolean
 }
 
 const apps = [
@@ -21,7 +23,7 @@ const apps = [
   { name: 'Safari', icon: '🌐', color: '#3498db' },
 ]
 
-const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed }) => {
+const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, isAnimating }) => {
   const currentTime = new Date().toLocaleTimeString('en-US', { 
     hour: '2-digit', 
     minute: '2-digit',
@@ -50,13 +52,13 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed }) => {
         <div className="time">{currentTime}</div>
       </div>
       
-      <div className="app-grid">
+      <div className={`app-grid ${openApp ? 'hidden' : ''}`}>
         {apps.map((app, index) => (
           <div
             key={index}
             className={`app-icon ${selectedIndex === index ? 'selected' : ''} ${
               selectedIndex === index && isPressed ? 'pressed' : ''
-            }`}
+            } ${selectedIndex === index && isAnimating ? 'launching' : ''}`}
             style={{
               '--app-color': app.color
             } as React.CSSProperties}
@@ -69,7 +71,24 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed }) => {
         ))}
       </div>
       
-      <div className="dock">
+      {openApp && (
+        <div className={`app-screen ${isAnimating ? 'animating' : ''}`} style={{
+          '--app-color': apps[parseInt(openApp.split('-')[1])]?.color || '#333'
+        } as React.CSSProperties}>
+          <div className="app-header">
+            <div className="app-title">{apps[parseInt(openApp.split('-')[1])]?.name}</div>
+            <div className="app-close">✕</div>
+          </div>
+          <div className="app-content">
+            <div className="app-icon-large">
+              {apps[parseInt(openApp.split('-')[1])]?.icon}
+            </div>
+            <p>Swipe up or click trackpad to close</p>
+          </div>
+        </div>
+      )}
+      
+      <div className={`dock ${openApp ? 'hidden' : ''}`}>
         <div className="dock-apps">
           <div className="dock-app">📞</div>
           <div className="dock-app">✉️</div>

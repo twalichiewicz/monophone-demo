@@ -19,6 +19,69 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick }) => {
   const dragStartRef = useRef({ x: 0, y: 0 })
   const lastDirectionRef = useRef({ x: 0, y: 0 })
   const hapticTimeoutRef = useRef<number | null>(null)
+  const tickIntervalRef = useRef<number | null>(null)
+  const audioContextRef = useRef<AudioContext | null>(null)
+
+  const initAudio = () => {
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+    }
+    return audioContextRef.current
+  }
+
+  const playTick = (distance: number) => {
+    const audioContext = initAudio()
+    const oscillator = audioContext.createOscillator()
+    const gainNode = audioContext.createGain()
+    
+    oscillator.connect(gainNode)
+    gainNode.connect(audioContext.destination)
+    
+    // Higher frequency for further distance
+    oscillator.frequency.value = 200 + (distance * 10)
+    oscillator.type = 'sine'
+    
+    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime)
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05)
+    
+    oscillator.start(audioContext.currentTime)
+    oscillator.stop(audioContext.currentTime + 0.05)
+  }
+
+  const playDeepClick = () => {
+    const audioContext = initAudio()
+    const oscillator = audioContext.createOscillator()
+    const gainNode = audioContext.createGain()
+    
+    oscillator.connect(gainNode)
+    gainNode.connect(audioContext.destination)
+    
+    // Deep satisfying click
+    oscillator.frequency.value = 60
+    oscillator.type = 'sine'
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1)
+    
+    oscillator.start(audioContext.currentTime)
+    oscillator.stop(audioContext.currentTime + 0.1)
+    
+    // Add a secondary click for richness
+    const oscillator2 = audioContext.createOscillator()
+    const gainNode2 = audioContext.createGain()
+    
+    oscillator2.connect(gainNode2)
+    gainNode2.connect(audioContext.destination)
+    
+    oscillator2.frequency.value = 120
+    oscillator2.type = 'square'
+    
+    gainNode2.gain.setValueAtTime(0.1, audioContext.currentTime)
+    gainNode2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.02)
+    
+    oscillator2.start(audioContext.currentTime)
+    oscillator2.stop(audioContext.currentTime + 0.02)
+  }
 
   const triggerHaptic = (style: 'light' | 'medium' | 'heavy' = 'light') => {
     if ('vibrate' in navigator) {
@@ -74,6 +137,7 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick }) => {
       setPosition({ x: 0, y: 0 })
       setIsPressed(false)
       lastDirectionRef.current = { x: 0, y: 0 }
+      stopTicking()
     }
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -100,6 +164,33 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick }) => {
     }
   }, [isDragging, onDirectionInput])
 
+  // Update ticking rate based on position
+  useEffect(() => {
+    if (isDragging && tickIntervalRef.current) {
+      stopTicking()
+      startTicking()
+    }
+  }, [position.x, position.y, isDragging])
+
+  const startTicking = () => {
+    if (tickIntervalRef.current) clearInterval(tickIntervalRef.current)
+    
+    tickIntervalRef.current = window.setInterval(() => {
+      const distance = Math.sqrt(position.x * position.x + position.y * position.y)
+      if (distance > 5) {
+        // Tick rate based on distance - further = faster ticks
+        playTick(distance)
+      }
+    }, Math.max(100, 500 - (Math.sqrt(position.x * position.x + position.y * position.y) * 10)))
+  }
+
+  const stopTicking = () => {
+    if (tickIntervalRef.current) {
+      clearInterval(tickIntervalRef.current)
+      tickIntervalRef.current = null
+    }
+  }
+
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault()
     setIsDragging(true)
@@ -112,12 +203,15 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick }) => {
       y: rect.top + rect.height / 2
     }
     dragStartRef.current = { x: e.clientX, y: e.clientY }
+    
+    startTicking()
   }
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault()
     if (Math.abs(position.x) < 5 && Math.abs(position.y) < 5) {
       triggerHaptic('heavy')
+      playDeepClick()
       onClick()
     }
   }
@@ -136,6 +230,8 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick }) => {
       y: touch.clientY
     }
     dragStartRef.current = { x: touch.clientX, y: touch.clientY }
+    
+    startTicking()
   }
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -154,36 +250,41 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick }) => {
   const handleTouchEnd = () => {
     if (Math.abs(position.x) < 5 && Math.abs(position.y) < 5) {
       triggerHaptic('heavy')
+      playDeepClick()
       onClick()
     }
     setIsDragging(false)
     setPosition({ x: 0, y: 0 })
     setIsPressed(false)
     lastDirectionRef.current = { x: 0, y: 0 }
+    stopTicking()
   }
 
   return (
     <div 
-      className="track-nub-container"
+      className={`track-nub-container ${isDragging ? 'active' : ''} ${isPressed ? 'showing-zones' : ''}`}
       onMouseDown={handleMouseDown}
       onClick={handleClick}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
+      <div className="trackpad-surface"></div>
+      <div className="click-zones">
+        <div className="click-zone"></div>
+        <div className="click-zone"></div>
+        <div className="click-zone"></div>
+        <div className="click-zone"></div>
+      </div>
       <div 
         ref={nubRef}
         className={`track-nub ${isPressed ? 'pressed' : ''}`}
         style={{
-          transform: `translate(${position.x}px, ${position.y}px) ${isPressed ? 'scale(0.95)' : 'scale(1)'}`,
+          transform: `translate(${position.x}px, ${position.y}px) ${isPressed ? 'scale(0.98)' : 'scale(1)'}`,
           pointerEvents: 'none'
         }}
       >
-        <div className="nub-surface">
-          <div className="nub-texture"></div>
-          <div className="nub-highlight"></div>
-          <div className="nub-shadow"></div>
-        </div>
+        <div className="nub-surface"></div>
       </div>
     </div>
   )

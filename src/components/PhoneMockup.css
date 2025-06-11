@@ -3,6 +3,7 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  min-height: 100dvh;
   background: #0a0a0a;
   padding: 40px;
 }
@@ -67,12 +68,14 @@
 @media (max-width: 768px) {
   .phone-mockup {
     min-height: 100vh;
+    min-height: 100dvh;
     padding: 0;
   }
   
   .phone-frame {
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     border-radius: 0;
     padding: 0;
     box-shadow: none;
@@ -83,9 +86,9 @@
     clip-path: polygon(
       0 0,
       100% 0,
-      100% calc(100% - 90px),
-      calc(100% - 90px) calc(100% - 90px),
-      calc(100% - 90px) 100%,
+      100% calc(100% - 180px),
+      calc(100% - 180px) calc(100% - 180px),
+      calc(100% - 180px) 100%,
       0 100%
     );
   }
