@@ -18,7 +18,6 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick }) => {
   const centerRef = useRef({ x: 0, y: 0 })
   const dragStartRef = useRef({ x: 0, y: 0 })
   const lastDirectionRef = useRef({ x: 0, y: 0 })
-  const hapticTimeoutRef = useRef<number | null>(null)
   const tickIntervalRef = useRef<number | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
 
