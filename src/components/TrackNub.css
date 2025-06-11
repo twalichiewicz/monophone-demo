@@ -180,6 +180,70 @@
   border-radius: 0 0 100% 0;
 }
 
+/* Long press Siri-like glow effect */
+.track-nub-container.long-press {
+  animation: siriGlow 0.5s ease-out forwards;
+}
+
+.track-nub-container.long-press .trackpad-surface {
+  animation: siriPulse 2s ease-in-out infinite;
+}
+
+@keyframes siriGlow {
+  0% {
+    box-shadow: 
+      0 0 0 3px #1a1a1a,
+      0 -4px 20px rgba(0, 0, 0, 0.6),
+      inset 0 2px 8px rgba(0, 0, 0, 0.9);
+  }
+  100% {
+    box-shadow: 
+      0 0 0 3px #1a1a1a,
+      0 -4px 20px rgba(0, 0, 0, 0.6),
+      inset 0 2px 8px rgba(0, 0, 0, 0.9),
+      0 0 60px 10px rgba(147, 51, 234, 0.8),
+      0 0 120px 20px rgba(59, 130, 246, 0.5),
+      0 0 180px 30px rgba(147, 51, 234, 0.3);
+  }
+}
+
+@keyframes siriPulse {
+  0%, 100% {
+    box-shadow: 
+      inset 0 2px 10px rgba(0, 0, 0, 0.8),
+      inset 0 -2px 4px rgba(255, 255, 255, 0.02),
+      inset 0 0 50px rgba(147, 51, 234, 0.3);
+  }
+  50% {
+    box-shadow: 
+      inset 0 2px 10px rgba(0, 0, 0, 0.8),
+      inset 0 -2px 4px rgba(255, 255, 255, 0.02),
+      inset 0 0 50px rgba(59, 130, 246, 0.5);
+  }
+}
+
+.track-nub-container.long-press .nub-surface {
+  background: radial-gradient(
+    circle at center, 
+    rgba(147, 51, 234, 0.6) 0%, 
+    rgba(59, 130, 246, 0.3) 50%,
+    transparent 70%
+  );
+  opacity: 1;
+  width: 100px;
+  height: 100px;
+  animation: nubGlow 2s ease-in-out infinite;
+}
+
+@keyframes nubGlow {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
 @media (max-width: 768px) {
   .track-nub-container {
     width: 180px;

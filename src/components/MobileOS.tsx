@@ -1,5 +1,6 @@
 import React from 'react'
 import './MobileOS.css'
+import beakerIcon from '../assets/beaker.png'
 
 interface MobileOSProps {
   selectedIndex: number
@@ -9,7 +10,7 @@ interface MobileOSProps {
 }
 
 const apps = [
-  { name: 'Messages', icon: '💬', color: '#2ecc71' },
+  { name: 'Lab', icon: 'beaker', isImage: true, color: '#2ecc71' },
   { name: 'Camera', icon: '📷', color: '#3498db' },
   { name: 'Photos', icon: '🖼️', color: '#e74c3c' },
   { name: 'Music', icon: '🎵', color: '#f39c12' },
@@ -20,7 +21,13 @@ const apps = [
   { name: 'Notes', icon: '📝', color: '#f1c40f' },
   { name: 'Clock', icon: '⏰', color: '#e67e22' },
   { name: 'Mail', icon: '✉️', color: '#34495e' },
+  { name: 'Flip', icon: '↻', color: '#8e44ad' },
+]
+
+const dockApps = [
+  { name: 'Phone', icon: '📞', color: '#27ae60' },
   { name: 'Safari', icon: '🌐', color: '#3498db' },
+  { name: 'Music', icon: '🎵', color: '#e74c3c' },
 ]
 
 const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, isAnimating }) => {
@@ -85,15 +92,40 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, 
             </div>
             <p>Swipe up or click trackpad to close</p>
           </div>
+          <div className="app-nav-bar">
+            <div className="nav-item">
+              <span className="nav-icon">←</span>
+              <span className="nav-label">Back</span>
+            </div>
+            <div className="nav-item">
+              <span className="nav-icon">⏺</span>
+              <span className="nav-label">Home</span>
+            </div>
+            <div className="nav-item">
+              <span className="nav-icon">⋮</span>
+              <span className="nav-label">More</span>
+            </div>
+          </div>
         </div>
       )}
       
       <div className={`dock ${openApp ? 'hidden' : ''}`}>
         <div className="dock-apps">
-          <div className="dock-app">📞</div>
-          <div className="dock-app">✉️</div>
-          <div className="dock-app">🌐</div>
-          <div className="dock-app">🎵</div>
+          {dockApps.map((app, index) => (
+            <div
+              key={index}
+              className={`dock-app ${selectedIndex === 12 + index ? 'selected' : ''} ${
+                selectedIndex === 12 + index && isPressed ? 'pressed' : ''
+              }`}
+              style={{
+                '--app-color': app.color
+              } as React.CSSProperties}
+            >
+              <div className="dock-app-content">
+                <span className="dock-app-emoji">{app.icon}</span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

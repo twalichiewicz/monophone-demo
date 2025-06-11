@@ -4,6 +4,8 @@ import PhoneMockup from './components/PhoneMockup'
 import TrackNub from './components/TrackNub'
 import MobileOS from './components/MobileOS'
 import DesktopModal from './components/DesktopModal'
+import SpatialView from './components/SpatialView'
+import { clickSoundManager } from './utils/audioUtils'
 
 function App() {
   const [selectedIndex, setSelectedIndex] = useState(0)
@@ -12,7 +14,7 @@ function App() {
   const [isFlipped, setIsFlipped] = useState(false)
   const [openApp, setOpenApp] = useState<string | null>(null)
   const [isAnimating, setIsAnimating] = useState(false)
-  const audioRef = useRef<HTMLAudioElement>(null)
+  const [showSpatialView, setShowSpatialView] = useState(false)
   const lastNavTimeRef = useRef(0)
   const navCooldown = 200 // ms between navigation
 
@@ -37,26 +39,28 @@ function App() {
     if (angle >= -45 && angle < 45) {
       // Right
       setSelectedIndex((prev) => {
-        if ((prev + 1) % 4 === 0) return prev
+        if (prev < 12 && (prev + 1) % 4 === 0) return prev
         moved = true
-        return Math.min(prev + 1, 11)
+        return Math.min(prev + 1, 14) // 12 apps + 3 dock items
       })
     } else if (angle >= 45 && angle < 135) {
       // Up
       setSelectedIndex((prev) => {
+        if (prev >= 12) return 8 + (prev - 12) // From dock to bottom row of apps
         moved = true
         return Math.max(prev - 4, 0)
       })
     } else if (angle >= -135 && angle < -45) {
       // Down
       setSelectedIndex((prev) => {
+        if (prev >= 8 && prev < 12) return 12 + Math.min(prev - 8, 2) // From bottom row to dock
         moved = true
         return Math.min(prev + 4, 11)
       })
     } else {
       // Left
       setSelectedIndex((prev) => {
-        if (prev % 4 === 0) return prev
+        if (prev < 12 && prev % 4 === 0) return prev
         moved = true
         return Math.max(prev - 1, 0)
       })
@@ -64,15 +68,29 @@ function App() {
     
     if (moved) {
       lastNavTimeRef.current = now
+      triggerHaptic('light')
+    }
+  }
+
+  const triggerHaptic = (style: 'light' | 'medium' | 'heavy' = 'medium') => {
+    if ('vibrate' in navigator) {
+      const duration = style === 'light' ? 10 : style === 'medium' ? 20 : 30
+      navigator.vibrate(duration)
     }
   }
 
   const handleClick = () => {
     setIsPressed(true)
-    // Play click sound
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0
-      audioRef.current.play()
+    triggerHaptic('heavy')
+    
+    // Play click sound with variation
+    clickSoundManager.playClick()
+    
+    // Check if flip app was selected
+    if (selectedIndex === 11 && !openApp) {
+      setIsFlipped(!isFlipped)
+      document.querySelector('.app')?.classList.toggle('flipped')
+      return
     }
     
     // Open app animation
@@ -103,10 +121,8 @@ function App() {
     checkMobile()
     window.addEventListener('resize', checkMobile)
 
-    // Create click sound
-    const audio = new Audio()
-    audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPThjMGG2C559SpXh0LPJzn9ctjJwVFmNDvxnEkA0f/'
-    audioRef.current = audio
+    // Initialize click sound manager
+    clickSoundManager.init()
 
     // Prevent touch scrolling
     const preventScroll = (e: TouchEvent) => {
@@ -138,14 +154,17 @@ function App() {
       <TrackNub
         onDirectionInput={handleDirectionInput}
         onClick={handleClick}
+        onFlip={() => {
+          setIsFlipped(!isFlipped)
+          document.querySelector('.app')?.classList.toggle('flipped')
+        }}
+        onLongPress={() => {
+          setShowSpatialView(true)
+        }}
       />
-      <button className="flip-button" onClick={() => {
-        setIsFlipped(!isFlipped)
-        document.querySelector('.app')?.classList.toggle('flipped')
-      }}>
-        ↻ Flip
-      </button>
-      <audio ref={audioRef} />
+      {showSpatialView && (
+        <SpatialView onClose={() => setShowSpatialView(false)} />
+      )}
     </div>
   )
 }

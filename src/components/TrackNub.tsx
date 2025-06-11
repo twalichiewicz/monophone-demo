@@ -4,22 +4,26 @@ import './TrackNub.css'
 interface TrackNubProps {
   onDirectionInput: (direction: { x: number; y: number }) => void
   onClick: () => void
+  onFlip?: () => void
+  onLongPress?: () => void
 }
 
 const SENSITIVITY = 0.3 // Lower = more precise control
 const DEAD_ZONE = 0.1 // Minimum movement to register
 const MAX_DISTANCE = 25 // Maximum drag distance
 
-const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick }) => {
+const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPress }) => {
   const [isDragging, setIsDragging] = useState(false)
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isPressed, setIsPressed] = useState(false)
+  const [isLongPress, setIsLongPress] = useState(false)
   const nubRef = useRef<HTMLDivElement>(null)
   const centerRef = useRef({ x: 0, y: 0 })
   const dragStartRef = useRef({ x: 0, y: 0 })
   const lastDirectionRef = useRef({ x: 0, y: 0 })
   const tickIntervalRef = useRef<number | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
+  const longPressTimerRef = useRef<number | null>(null)
 
   const initAudio = () => {
     if (!audioContextRef.current) {
@@ -132,6 +136,7 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick }) => {
 
   useEffect(() => {
     const handleMouseUp = () => {
+      cancelLongPress()
       setIsDragging(false)
       setPosition({ x: 0, y: 0 })
       setIsPressed(false)
@@ -148,6 +153,11 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick }) => {
       
       const deltaX = e.clientX - centerX
       const deltaY = e.clientY - centerY
+      
+      // Cancel long press if moved too much
+      if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+        cancelLongPress()
+      }
       
       processInput(deltaX, deltaY)
     }
@@ -190,6 +200,26 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick }) => {
     }
   }
 
+  const startLongPressTimer = () => {
+    if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current)
+    
+    longPressTimerRef.current = window.setTimeout(() => {
+      if (isPressed && Math.abs(position.x) < 5 && Math.abs(position.y) < 5) {
+        setIsLongPress(true)
+        triggerHaptic('heavy')
+        if (onLongPress) onLongPress()
+      }
+    }, 3000) // 3 seconds
+  }
+
+  const cancelLongPress = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current)
+      longPressTimerRef.current = null
+    }
+    setIsLongPress(false)
+  }
+
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault()
     setIsDragging(true)
@@ -204,11 +234,12 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick }) => {
     dragStartRef.current = { x: e.clientX, y: e.clientY }
     
     startTicking()
+    startLongPressTimer()
   }
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault()
-    if (Math.abs(position.x) < 5 && Math.abs(position.y) < 5) {
+    if (Math.abs(position.x) < 5 && Math.abs(position.y) < 5 && !isLongPress) {
       triggerHaptic('heavy')
       playDeepClick()
       onClick()
@@ -231,6 +262,7 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick }) => {
     dragStartRef.current = { x: touch.clientX, y: touch.clientY }
     
     startTicking()
+    startLongPressTimer()
   }
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -243,11 +275,17 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick }) => {
     const deltaX = touch.clientX - centerRef.current.x
     const deltaY = touch.clientY - centerRef.current.y
     
+    // Cancel long press if moved too much
+    if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+      cancelLongPress()
+    }
+    
     processInput(deltaX, deltaY)
   }
 
   const handleTouchEnd = () => {
-    if (Math.abs(position.x) < 5 && Math.abs(position.y) < 5) {
+    cancelLongPress()
+    if (Math.abs(position.x) < 5 && Math.abs(position.y) < 5 && !isLongPress) {
       triggerHaptic('heavy')
       playDeepClick()
       onClick()
@@ -261,7 +299,7 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick }) => {
 
   return (
     <div 
-      className={`track-nub-container ${isDragging ? 'active' : ''} ${isPressed ? 'showing-zones' : ''}`}
+      className={`track-nub-container ${isDragging ? 'active' : ''} ${isPressed ? 'showing-zones' : ''} ${isLongPress ? 'long-press' : ''}`}
       onMouseDown={handleMouseDown}
       onClick={handleClick}
       onTouchStart={handleTouchStart}
