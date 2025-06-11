@@ -1,0 +1,108 @@
+.track-nub-container {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  z-index: 150;
+  background: #0a0a0a;
+  border-radius: 50% 0 0 0;
+  padding: 25px;
+  box-shadow: 
+    0 0 0 2px #1a1a1a,
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    inset 0 2px 4px rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.track-nub-container::before {
+  display: none;
+}
+
+.track-nub-container::after {
+  display: none;
+}
+
+.track-nub {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  transition: transform 0.08s ease-out;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+
+.track-nub::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.track-nub.pressed::after {
+  opacity: 1;
+}
+
+.nub-surface {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #1a1a1a;
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.5),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.nub-texture {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #1a1a1a;
+  border-radius: 50%;
+}
+
+.nub-highlight {
+  display: none;
+}
+
+.nub-shadow {
+  display: none;
+}
+
+.track-nub.pressed .nub-surface {
+  background: #0a0a0a;
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.8),
+    0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 768px) {
+  .track-nub-container {
+    width: 90px;
+    height: 90px;
+    padding: 30px;
+  }
+  
+  .track-nub {
+    width: 30px;
+    height: 30px;
+  }
+}

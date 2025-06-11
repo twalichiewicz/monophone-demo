@@ -1,0 +1,86 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.app {
+  width: 100vw;
+  height: 100vh;
+  background: #0a0a0a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.app.flipped {
+  transform: rotate(180deg);
+}
+
+.flip-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 200;
+  backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+}
+
+.flip-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 768px) {
+  .app {
+    padding: 0;
+    height: 100vh;
+    height: -webkit-fill-available;
+    max-height: -webkit-fill-available;
+  }
+  
+  .phone-mockup {
+    width: 100vw;
+    height: 100vh;
+    height: -webkit-fill-available;
+    padding: 0;
+  }
+  
+  .phone-frame {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  
+  .phone-screen {
+    border-radius: 0;
+  }
+  
+  .phone-speaker,
+  .phone-home-indicator {
+    display: none;
+  }
+  
+  .flip-button {
+    top: 10px;
+    left: 10px;
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+}

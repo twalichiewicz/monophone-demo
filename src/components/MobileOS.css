@@ -1,0 +1,188 @@
+.mobile-os {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-top: 40px;
+}
+
+.status-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  font-size: 14px;
+  z-index: 10;
+}
+
+.status-icons {
+  display: flex;
+  gap: 8px;
+  font-size: 16px;
+}
+
+.lock-screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 20px;
+  color: white;
+  text-align: center;
+}
+
+.date {
+  font-size: 18px;
+  opacity: 0.8;
+  margin-bottom: 10px;
+}
+
+.time {
+  font-size: 72px;
+  font-weight: 200;
+  letter-spacing: -2px;
+}
+
+.app-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  padding: 20px;
+  padding-bottom: 120px;
+  padding-right: 100px;
+  overflow-y: auto;
+  align-content: start;
+}
+
+.app-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 10px;
+  border-radius: 20px;
+}
+
+.app-icon-content {
+  width: 55px;
+  height: 55px;
+  background: var(--app-color, #555);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.app-name {
+  font-size: 12px;
+  color: white;
+  opacity: 0.9;
+  text-align: center;
+}
+
+.app-icon.selected {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.app-icon.selected .app-icon-content {
+  transform: scale(1.1);
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.4),
+    0 0 0 2px rgba(255, 255, 255, 0.3);
+}
+
+.app-icon.pressed .app-icon-content {
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dock {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 100px;
+  height: 80px;
+  background: rgba(30, 30, 30, 0.8);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.dock-apps {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 100%;
+}
+
+.dock-app {
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  transition: all 0.2s ease;
+}
+
+.dock-app:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-icon,
+  .app-icon-content,
+  .dock-app {
+    transition: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-os {
+    padding-top: 20px;
+  }
+  
+  .status-bar {
+    height: 20px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+  
+  .app-grid {
+    gap: 15px;
+    padding: 15px;
+    padding-bottom: 100px;
+    padding-right: 120px;
+  }
+  
+  .dock {
+    bottom: 10px;
+    left: 10px;
+    right: 110px;
+    height: 60px;
+  }
+  
+  .dock-app {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+}
