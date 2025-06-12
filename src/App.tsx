@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import './App.css'
 import PhoneMockup from './components/PhoneMockup'
 import TrackNub from './components/TrackNub'
@@ -16,11 +16,56 @@ function App() {
   const [isAnimating, setIsAnimating] = useState(false)
   const [showSpatialView, setShowSpatialView] = useState(false)
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
+  const [cursorPosition, setCursorPosition] = useState({ x: 50, y: 50 }) // Percentage-based position
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const [cursorVisible, setCursorVisible] = useState(false)
+  const cursorTimeoutRef = useRef<number | undefined>(undefined)
   const lastNavTimeRef = useRef(0)
   const navCooldown = 200 // ms between navigation
 
-  const handleDirectionInput = (direction: { x: number; y: number }) => {
-    // Handle omnidirectional navigation with cooldown
+  const handleDirectionInput = (direction: { x: number; y: number }, isDelta: boolean = false) => {
+    // If we're in trackpad mode, update cursor position
+    if (isDelta) {
+      // Show cursor when there's input
+      setCursorVisible(true)
+      
+      // Clear existing timeout
+      if (cursorTimeoutRef.current) {
+        clearTimeout(cursorTimeoutRef.current)
+      }
+      
+      // Set new timeout to hide cursor after 3 seconds of inactivity
+      cursorTimeoutRef.current = window.setTimeout(() => {
+        setCursorVisible(false)
+        setCursorPosition({ x: 50, y: 50 }) // Reset to center
+        setHoveredIndex(null)
+      }, 3000)
+      setCursorPosition(prev => {
+        // Get trackpad center position (assuming it's at bottom center of screen)
+        const trackpadCenterX = 50; // percentage
+        const trackpadCenterY = 90; // percentage (near bottom)
+        
+        // Calculate distance from trackpad center to cursor
+        const distanceX = Math.abs(prev.x - trackpadCenterX);
+        const distanceY = Math.abs(prev.y - trackpadCenterY);
+        const radialDistance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+        
+        // Apply decreasing sensitivity based on distance (1.0 at center, 0.2 at edges)
+        const distanceFactor = Math.max(0.2, 1.0 - (radialDistance / 100));
+        const baseSensitivity = 0.25;
+        const adjustedSensitivity = baseSensitivity * distanceFactor;
+        
+        const newX = Math.max(0, Math.min(100, prev.x + direction.x * adjustedSensitivity))
+        const newY = Math.max(0, Math.min(100, prev.y + direction.y * adjustedSensitivity))
+        return { x: newX, y: newY }
+      })
+      
+      // Check which app the cursor is over
+      checkHoveredApp()
+      return
+    }
+    
+    // Handle omnidirectional navigation with cooldown (legacy mode)
     const now = Date.now()
     if (now - lastNavTimeRef.current < navCooldown) return
     
@@ -35,8 +80,8 @@ function App() {
     const adjustedY = isFlipped ? direction.y : -direction.y
     const angle = Math.atan2(adjustedY, adjustedX) * (180 / Math.PI)
     
-    // If app is open, handle app-specific navigation
-    if (openApp) {
+    // If app is open and not in trackpad mode, handle directional navigation
+    if (openApp && !isDelta) {
       let navDirection: 'up' | 'down' | 'left' | 'right'
       
       if (angle >= -45 && angle < 45) {
@@ -108,14 +153,16 @@ function App() {
     // Sound is now played in TrackNub on press, not on click
     
     if (!openApp) {
-      // On springboard - open app
-      if (selectedIndex === 10) {
+      // On springboard - open app based on hovered index
+      const indexToOpen = hoveredIndex !== null ? hoveredIndex : selectedIndex
+      
+      if (indexToOpen === 10) {
         setIsFlipped(!isFlipped)
         document.querySelector('.app')?.classList.toggle('flipped')
-      } else if (!isAnimating) {
+      } else if (!isAnimating && indexToOpen >= 0 && indexToOpen <= 14) {
         setIsAnimating(true)
         setTimeout(() => {
-          setOpenApp(`app-${selectedIndex}`)
+          setOpenApp(`app-${indexToOpen}`)
           setIsAnimating(false)
           // Initialize first element as selected
           setSelectedElementId('app-close-button')
@@ -157,6 +204,62 @@ function App() {
       }, 300)
     }
   }
+  
+  const checkHoveredApp = React.useCallback(() => {
+    // Get cursor position in viewport coordinates
+    const mobileOS = document.querySelector('.mobile-os')
+    if (!mobileOS) return
+    
+    const rect = mobileOS.getBoundingClientRect()
+    const x = rect.left + (cursorPosition.x / 100) * rect.width
+    const y = rect.top + (cursorPosition.y / 100) * rect.height
+    
+    if (openApp) {
+      // Check selectable elements in app
+      const selectableElements = document.querySelectorAll('[data-selectable]')
+      let foundElementId: string | null = null
+      
+      selectableElements.forEach((element) => {
+        const htmlElement = element as HTMLElement
+        const elemRect = htmlElement.getBoundingClientRect()
+        if (x >= elemRect.left && x <= elemRect.right &&
+            y >= elemRect.top && y <= elemRect.bottom) {
+          foundElementId = htmlElement.id
+        }
+      })
+      
+      if (foundElementId) {
+        setSelectedElementId(foundElementId)
+      }
+    } else {
+      // Check all app icons
+      const appIcons = document.querySelectorAll('.app-icon')
+      let foundIndex: number | null = null
+      
+      appIcons.forEach((icon, index) => {
+        const iconRect = icon.getBoundingClientRect()
+        if (x >= iconRect.left && x <= iconRect.right &&
+            y >= iconRect.top && y <= iconRect.bottom) {
+          foundIndex = index
+        }
+      })
+      
+      // Check dock items
+      const dockItems = document.querySelectorAll('.dock-item')
+      dockItems.forEach((item, index) => {
+        const itemRect = item.getBoundingClientRect()
+        if (x >= itemRect.left && x <= itemRect.right &&
+            y >= itemRect.top && y <= itemRect.bottom) {
+          foundIndex = 12 + index
+        }
+      })
+      
+      setHoveredIndex(foundIndex)
+      if (foundIndex !== null) {
+        setSelectedIndex(foundIndex)
+      }
+    }
+  }, [cursorPosition, openApp])
   
   const handleCloseApp = () => {
     triggerHaptic('light')
@@ -312,6 +415,20 @@ function App() {
     }
   }, [selectedElementId, openApp])
 
+  // Update hovered app when cursor moves
+  useEffect(() => {
+    checkHoveredApp()
+  }, [checkHoveredApp])
+  
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (cursorTimeoutRef.current) {
+        clearTimeout(cursorTimeoutRef.current)
+      }
+    }
+  }, [])
+
   if (!isMobile) {
     return <DesktopModal />
   }
@@ -327,6 +444,9 @@ function App() {
           selectedElementId={selectedElementId}
           onAppClick={handleAppDirectClick}
           onCloseApp={handleCloseApp}
+          cursorPosition={cursorPosition}
+          hoveredIndex={hoveredIndex}
+          cursorVisible={cursorVisible}
         />
       </PhoneMockup>
       <TrackNub

@@ -377,3 +377,124 @@ export const MessagesUI: React.FC<AppUIProps> = () => {
     </div>
   )
 }
+
+export const PhoneUI: React.FC<AppUIProps> = () => {
+  const recentCalls = [
+    { name: 'Mom', time: '10:30 AM', type: 'outgoing' },
+    { name: 'Unknown', number: '(555) 987-6543', time: '9:15 AM', type: 'missed' },
+    { name: 'John Doe', time: 'Yesterday', type: 'incoming' }
+  ]
+  
+  return (
+    <div className="phone-ui">
+      <div className="phone-tabs">
+        <div id="phone-favorites" data-selectable="true" className="phone-tab">⭐ Favorites</div>
+        <div id="phone-recents" data-selectable="true" className="phone-tab active">🕐 Recents</div>
+        <div id="phone-contacts" data-selectable="true" className="phone-tab">👤 Contacts</div>
+        <div id="phone-keypad" data-selectable="true" className="phone-tab">🔢 Keypad</div>
+      </div>
+      
+      <div className="phone-content">
+        <div className="recent-calls">
+          {recentCalls.map((call, i) => (
+            <div 
+              key={i} 
+              id={`call-${i}`}
+              data-selectable="true"
+              className="call-item"
+            >
+              <div className={`call-icon ${call.type}`}>
+                {call.type === 'missed' ? '📵' : call.type === 'outgoing' ? '📱' : '📞'}
+              </div>
+              <div className="call-info">
+                <div className="call-name">{call.name || call.number}</div>
+                <div className="call-time">{call.time}</div>
+              </div>
+              <div id={`call-action-${i}`} data-selectable="true" className="call-action">ℹ️</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      <div className="phone-dial-button">
+        <div id="phone-dial" data-selectable="true" className="dial-button">
+          📞
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export const SafariUI: React.FC<AppUIProps> = () => {
+  const bookmarks = [
+    { name: 'Google', url: 'google.com', icon: '🔍' },
+    { name: 'YouTube', url: 'youtube.com', icon: '📺' },
+    { name: 'GitHub', url: 'github.com', icon: '💻' },
+    { name: 'Twitter', url: 'twitter.com', icon: '🐦' }
+  ]
+  
+  const suggestions = [
+    'Latest news',
+    'Weather today',
+    'Nearby restaurants',
+    'Movie times'
+  ]
+  
+  return (
+    <div className="safari-ui">
+      <div className="safari-header">
+        <div className="url-bar">
+          <div id="safari-back" data-selectable="true" className="nav-button">←</div>
+          <div id="safari-forward" data-selectable="true" className="nav-button">→</div>
+          <input 
+            id="safari-url"
+            data-selectable="true"
+            type="text" 
+            placeholder="Search or enter website name" 
+            className="url-input" 
+          />
+          <div id="safari-refresh" data-selectable="true" className="nav-button">↻</div>
+        </div>
+      </div>
+      
+      <div className="safari-content">
+        <div className="safari-welcome">
+          <h2>Welcome to Safari</h2>
+          <div className="bookmarks-grid">
+            {bookmarks.map((bookmark, i) => (
+              <div 
+                key={i} 
+                id={`bookmark-${i}`}
+                data-selectable="true"
+                className="bookmark-item"
+              >
+                <div className="bookmark-icon">{bookmark.icon}</div>
+                <div className="bookmark-name">{bookmark.name}</div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="suggestions">
+            <h3>Suggested Searches</h3>
+            {suggestions.map((suggestion, i) => (
+              <div 
+                key={i} 
+                id={`suggestion-${i}`}
+                data-selectable="true"
+                className="suggestion-item"
+              >
+                🔍 {suggestion}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      
+      <div className="safari-toolbar">
+        <div id="safari-share" data-selectable="true" className="toolbar-button">↗️</div>
+        <div id="safari-bookmarks" data-selectable="true" className="toolbar-button">📚</div>
+        <div id="safari-tabs" data-selectable="true" className="toolbar-button">⧉</div>
+      </div>
+    </div>
+  )
+}

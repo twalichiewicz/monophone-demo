@@ -3,14 +3,13 @@ import './TrackNub.css'
 import { clickSoundManager } from '../utils/audioUtils'
 
 interface TrackNubProps {
-  onDirectionInput: (direction: { x: number; y: number }) => void
+  onDirectionInput: (direction: { x: number; y: number }, isDelta?: boolean) => void
   onClick: () => void
   onFlip?: () => void
   onLongPress?: () => void
 }
 
 const SENSITIVITY = 0.3 // Lower = more precise control
-const DEAD_ZONE = 0.1 // Minimum movement to register
 const MAX_DISTANCE = 25 // Maximum drag distance
 
 const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPress }) => {
@@ -69,6 +68,10 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
       hasDraggedRef.current = true
     }
     
+    // Send raw delta for trackpad mode
+    onDirectionInput({ x: deltaX, y: deltaY }, true)
+    
+    // Also update visual position for the nub
     let normalizedX = adjustedX / MAX_DISTANCE
     let normalizedY = adjustedY / MAX_DISTANCE
     
@@ -77,31 +80,15 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
       normalizedY = (adjustedY / distance) * MAX_DISTANCE / MAX_DISTANCE
     }
     
-    // Apply dead zone
-    const magnitude = Math.sqrt(normalizedX * normalizedX + normalizedY * normalizedY)
-    if (magnitude < DEAD_ZONE) {
-      normalizedX = 0
-      normalizedY = 0
-    } else {
-      // Scale out of dead zone
-      const scaledMagnitude = (magnitude - DEAD_ZONE) / (1 - DEAD_ZONE)
-      normalizedX = (normalizedX / magnitude) * scaledMagnitude
-      normalizedY = (normalizedY / magnitude) * scaledMagnitude
-    }
-    
     setPosition({
       x: normalizedX * MAX_DISTANCE,
       y: normalizedY * MAX_DISTANCE
     })
     
-    // Trigger haptics on direction change
-    if (Math.abs(normalizedX - lastDirectionRef.current.x) > 0.1 || 
-        Math.abs(normalizedY - lastDirectionRef.current.y) > 0.1) {
+    // Trigger haptics on significant movement
+    if (distance > 10) {
       triggerHaptic('light')
-      lastDirectionRef.current = { x: normalizedX, y: normalizedY }
     }
-    
-    onDirectionInput({ x: normalizedX, y: normalizedY })
   }
 
   useEffect(() => {
