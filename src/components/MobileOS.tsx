@@ -1,6 +1,5 @@
 import React from 'react'
 import './MobileOS.css'
-import beakerIcon from '../assets/beaker.png'
 
 interface MobileOSProps {
   selectedIndex: number
