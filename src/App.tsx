@@ -123,6 +123,13 @@ function App() {
         setTimeout(() => {
           setOpenApp(`app-${selectedIndex}`)
           setIsAnimating(false)
+          // Select the first focusable element in the app
+          setTimeout(() => {
+            const firstFocusable = document.querySelector('.app-close-button, .clock-button, .map-action, .photo-item, .forecast-day, .note-item, .control-btn, .mail-item, .setting-item, .conversation-item, .camera-mode, .nav-item') as HTMLElement
+            if (firstFocusable) {
+              firstFocusable.classList.add('selected')
+            }
+          }, 100)
         }, 300)
       }
       setTimeout(() => setIsPressed(false), 100)
@@ -155,12 +162,19 @@ function App() {
       } else if (taps === 1) {
         // Single tap in app - click the selected element
         const selectedElement = document.querySelector('.selected') as HTMLElement
+        
         if (selectedElement && selectedElement.classList.contains('app-close-button')) {
           // User selected the close button - close the app
-          selectedElement.click()
+          handleCloseApp()
         } else if (selectedElement) {
           // Click any other selected element
-          selectedElement.click()
+          // Create and dispatch a synthetic click event
+          const clickEvent = new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            view: window
+          })
+          selectedElement.dispatchEvent(clickEvent)
         }
         // Single tap does NOT close the app unless close button is selected
       }
@@ -191,6 +205,13 @@ function App() {
       setTimeout(() => {
         setOpenApp(`app-${index}`)
         setIsAnimating(false)
+        // Select the first focusable element in the app
+        setTimeout(() => {
+          const firstFocusable = document.querySelector('.app-close-button, .clock-button, .map-action, .photo-item, .forecast-day, .note-item, .control-btn, .mail-item, .setting-item, .conversation-item, .camera-mode, .nav-item') as HTMLElement
+          if (firstFocusable) {
+            firstFocusable.classList.add('selected')
+          }
+        }, 100)
       }, 300)
     }
   }
