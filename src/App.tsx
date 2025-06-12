@@ -110,8 +110,8 @@ function App() {
     triggerHaptic('heavy')
     clickSoundManager.playClick()
     
+    // CASE 1: On springboard - single tap opens app immediately
     if (!openApp) {
-      // On springboard - immediately open app
       if (selectedIndex === 10) {
         // Flip app
         setIsFlipped(!isFlipped)
@@ -125,9 +125,17 @@ function App() {
           setIsAnimating(false)
           // Select the first focusable element in the app
           setTimeout(() => {
-            const firstFocusable = document.querySelector('.app-close-button, .clock-button, .map-action, .photo-item, .forecast-day, .note-item, .control-btn, .mail-item, .setting-item, .conversation-item, .camera-mode, .nav-item') as HTMLElement
-            if (firstFocusable) {
-              firstFocusable.classList.add('selected')
+            // Clear ALL selections first
+            document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'))
+            
+            // Find and select the close button in the new app
+            const appScreen = document.querySelector('.app-screen')
+            if (appScreen) {
+              const closeButton = appScreen.querySelector('.app-close-button') as HTMLElement
+              if (closeButton) {
+                closeButton.classList.add('selected')
+                setAppSelectedIndex(0) // Reset index
+              }
             }
           }, 100)
         }, 300)
@@ -136,21 +144,22 @@ function App() {
       return
     }
     
-    // In app - handle single/double tap
+    // CASE 2: In app - handle taps
     tapCountRef.current += 1
     
-    // Clear existing timer
     if (tapTimerRef.current) {
       clearTimeout(tapTimerRef.current)
     }
     
-    // Set timer for tap detection
     tapTimerRef.current = window.setTimeout(() => {
       const taps = tapCountRef.current
-      tapCountRef.current = 0 // Reset tap count
+      tapCountRef.current = 0
       
-      if (taps === 2) {
-        // Double tap in app - go home
+      console.log(`Processing ${taps} tap(s) in app`)
+      
+      if (taps >= 2) {
+        // Double tap (or more) - always go home
+        console.log('Double tap detected - going home')
         triggerHaptic('medium')
         setTimeout(() => triggerHaptic('medium'), 50)
         
@@ -158,16 +167,40 @@ function App() {
         setTimeout(() => {
           setOpenApp(null)
           setIsAnimating(false)
+          // Clear all selections when going home
+          document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'))
         }, 300)
       } else if (taps === 1) {
-        // Single tap in app - DO NOT CLOSE APP
-        const selectedElement = document.querySelector('.selected') as HTMLElement
+        // Single tap - activate selected element ONLY
+        const appScreen = document.querySelector('.app-screen')
+        if (!appScreen) {
+          console.warn('No app screen found')
+          return
+        }
         
-        if (selectedElement && selectedElement.classList.contains('app-close-button')) {
-          // User selected the close button - this is the ONLY way single tap closes app
+        const selectedElement = appScreen.querySelector('.selected') as HTMLElement
+        
+        if (!selectedElement) {
+          console.warn('No element selected within app screen')
+          return
+        }
+        
+        // Ensure the selected element is actually within the current app
+        if (!appScreen.contains(selectedElement)) {
+          console.warn('Selected element is not within current app screen')
+          return
+        }
+        
+        console.log('Selected element:', selectedElement.className, selectedElement.textContent)
+        
+        // Check if it's the close button
+        if (selectedElement.classList.contains('app-close-button')) {
+          console.log('Close button selected - closing app')
+          // Close app
           handleCloseApp()
-        } else if (selectedElement) {
-          // For any other element, simulate a click but DO NOT close app
+        } else {
+          console.log('Activating element:', selectedElement)
+          // Activate the element (click it)
           const clickEvent = new MouseEvent('click', {
             bubbles: true,
             cancelable: true,
@@ -175,7 +208,6 @@ function App() {
           })
           selectedElement.dispatchEvent(clickEvent)
         }
-        // Single tap does NOT close the app unless close button is selected
       }
     }, doubleTapDelay)
     
@@ -206,9 +238,17 @@ function App() {
         setIsAnimating(false)
         // Select the first focusable element in the app
         setTimeout(() => {
-          const firstFocusable = document.querySelector('.app-close-button, .clock-button, .map-action, .photo-item, .forecast-day, .note-item, .control-btn, .mail-item, .setting-item, .conversation-item, .camera-mode, .nav-item') as HTMLElement
-          if (firstFocusable) {
-            firstFocusable.classList.add('selected')
+          // Clear ALL selections first
+          document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'))
+          
+          // Find and select the close button in the new app
+          const appScreen = document.querySelector('.app-screen')
+          if (appScreen) {
+            const closeButton = appScreen.querySelector('.app-close-button') as HTMLElement
+            if (closeButton) {
+              closeButton.classList.add('selected')
+              setAppSelectedIndex(0) // Reset index
+            }
           }
         }, 100)
       }, 300)
@@ -225,17 +265,16 @@ function App() {
       setTimeout(() => {
         setOpenApp(null)
         setIsAnimating(false)
+        // Clear all selections when closing app
+        document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'))
       }, 300)
     }
   }
   
   const handleAppNavigation = (direction: 'up' | 'down' | 'left' | 'right') => {
     // Get all focusable elements in the current app
-    const appHeader = document.querySelector('.app-header')
-    const appContent = document.querySelector('.app-content')
-    const navBar = document.querySelector('.app-nav-bar')
-    
-    if (!appContent) return
+    const appScreen = document.querySelector('.app-screen')
+    if (!appScreen) return
     
     // Define selectors for focusable elements
     const focusableSelectors = [
@@ -258,21 +297,19 @@ function App() {
       '.app-close-button'
     ].join(', ')
     
-    // Get all focusable elements from header, content and nav bar
-    const headerFocusable = appHeader ? Array.from(appHeader.querySelectorAll(focusableSelectors)) : []
-    const appFocusable = Array.from(appContent.querySelectorAll(focusableSelectors))
-    const navFocusable = navBar ? Array.from(navBar.querySelectorAll(focusableSelectors)) : []
-    const allFocusable = [...headerFocusable, ...appFocusable, ...navFocusable]
+    // Get all focusable elements from the entire app screen
+    const allFocusable = Array.from(appScreen.querySelectorAll(focusableSelectors))
     
     if (allFocusable.length === 0) return
     
-    // Find currently selected element
-    const currentElement = allFocusable.find(el => 
-      el.classList.contains('selected') || 
-      el === document.activeElement
-    )
+    // Clear all existing selections first
+    document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'))
     
-    const currentIndex = currentElement ? allFocusable.indexOf(currentElement) : -1
+    // Find currently selected element
+    let currentIndex = appSelectedIndex
+    if (currentIndex < 0 || currentIndex >= allFocusable.length) {
+      currentIndex = 0
+    }
     
     // Calculate positions of all elements
     const elementPositions = allFocusable.map(el => {
@@ -288,14 +325,10 @@ function App() {
       }
     })
     
-    const currentPos = currentIndex >= 0 ? elementPositions[currentIndex] : null
-    let nextElement = null
-    let nextIndex = -1
+    const currentPos = elementPositions[currentIndex]
+    let nextIndex = currentIndex
     
-    if (!currentPos) {
-      // No current selection, select first element
-      nextIndex = 0
-    } else {
+    if (currentPos) {
       // Find the best next element based on direction
       const candidates = elementPositions.filter((pos, idx) => {
         if (idx === currentIndex) return false
@@ -332,29 +365,32 @@ function App() {
       }
     }
     
+    // Update selection
     if (nextIndex >= 0 && nextIndex < allFocusable.length) {
-      // Remove selected class from all elements
-      allFocusable.forEach(el => el.classList.remove('selected'))
+      // Clear all selections
+      document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'))
       
       // Add selected class to next element
-      nextElement = allFocusable[nextIndex]
+      const nextElement = allFocusable[nextIndex]
       nextElement.classList.add('selected')
       
-      // Update the app selected index for compatibility
+      // Update the app selected index
       setAppSelectedIndex(nextIndex)
       
       // Scroll element into view if needed
-      const container = appContent
-      const rect = nextElement.getBoundingClientRect()
-      const containerRect = container.getBoundingClientRect()
-      
-      // Check if element is outside visible area
-      if (rect.top < containerRect.top || rect.bottom > containerRect.bottom - 90) {
-        nextElement.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'center',
-          inline: 'center'
-        })
+      const container = document.querySelector('.app-content')
+      if (container) {
+        const rect = nextElement.getBoundingClientRect()
+        const containerRect = container.getBoundingClientRect()
+        
+        // Check if element is outside visible area
+        if (rect.top < containerRect.top || rect.bottom > containerRect.bottom - 90) {
+          nextElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center',
+            inline: 'center'
+          })
+        }
       }
     }
   }

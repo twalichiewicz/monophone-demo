@@ -352,6 +352,13 @@
   transform: scale(0.95);
 }
 
+.nav-item.selected {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 2px;
+}
+
 .nav-icon {
   font-size: 24px;
   color: rgba(255, 255, 255, 0.9);
@@ -361,6 +368,13 @@
   font-size: 10px;
   color: rgba(255, 255, 255, 0.7);
   font-weight: 500;
+}
+
+/* Ensure selected styling is scoped properly */
+.app-screen .selected {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 2px;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 @media (max-width: 768px) {
