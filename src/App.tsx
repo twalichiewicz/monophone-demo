@@ -160,15 +160,14 @@ function App() {
           setIsAnimating(false)
         }, 300)
       } else if (taps === 1) {
-        // Single tap in app - click the selected element
+        // Single tap in app - DO NOT CLOSE APP
         const selectedElement = document.querySelector('.selected') as HTMLElement
         
         if (selectedElement && selectedElement.classList.contains('app-close-button')) {
-          // User selected the close button - close the app
+          // User selected the close button - this is the ONLY way single tap closes app
           handleCloseApp()
         } else if (selectedElement) {
-          // Click any other selected element
-          // Create and dispatch a synthetic click event
+          // For any other element, simulate a click but DO NOT close app
           const clickEvent = new MouseEvent('click', {
             bubbles: true,
             cancelable: true,
