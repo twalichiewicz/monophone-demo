@@ -105,7 +105,7 @@ function App() {
   const handleClick = () => {
     setIsPressed(true)
     triggerHaptic('heavy')
-    clickSoundManager.playClick()
+    // Sound is now played in TrackNub on press, not on click
     
     if (!openApp) {
       // On springboard - open app
@@ -138,7 +138,7 @@ function App() {
   
   const handleAppDirectClick = (index: number) => {
     triggerHaptic('medium')
-    clickSoundManager.playClick()
+    // Sound is played by touch/mouse events in the UI components
     
     setSelectedIndex(index)
     
@@ -160,7 +160,7 @@ function App() {
   
   const handleCloseApp = () => {
     triggerHaptic('light')
-    clickSoundManager.playClick()
+    // Sound is played by touch/mouse events in the UI components
     
     if (openApp) {
       setIsAnimating(true)
@@ -343,27 +343,6 @@ function App() {
       {showSpatialView && (
         <SpatialView onClose={() => setShowSpatialView(false)} />
       )}
-      {/* Debug audio button */}
-      <button
-        style={{
-          position: 'fixed',
-          top: '10px',
-          left: '10px',
-          zIndex: 200,
-          padding: '10px',
-          background: '#333',
-          color: 'white',
-          border: 'none',
-          borderRadius: '5px',
-          fontSize: '12px'
-        }}
-        onClick={() => {
-          console.log('Test click sound')
-          clickSoundManager.playClick()
-        }}
-      >
-        Test Sound
-      </button>
     </div>
   )
 }
