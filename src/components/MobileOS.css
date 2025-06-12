@@ -57,7 +57,7 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 15px;
   padding: 20px;
-  padding-bottom: 140px;
+  padding-bottom: 110px; /* Account for 90px dock + 20px gap */
   overflow-y: auto;
   align-content: start;
 }
@@ -111,15 +111,17 @@
 
 .dock {
   position: absolute;
-  bottom: 40px;
+  bottom: 0;
   left: 15px;
-  right: 15px;
-  height: 70px;
+  right: 105px; /* 90px nub + 15px gap */
+  height: 90px;
   background: rgba(30, 30, 30, 0.8);
   backdrop-filter: blur(20px);
   border-radius: 20px;
-  padding: 10px;
+  padding: 15px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
 }
 
 .dock-apps {
@@ -250,11 +252,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   color: white;
-  text-align: center;
-  padding: 20px;
+  overflow: hidden;
 }
 
 .app-icon-large {

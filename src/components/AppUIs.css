@@ -1,0 +1,790 @@
+/* Clock App */
+.clock-ui {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 30px;
+  color: white;
+}
+
+.digital-clock {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.time-large {
+  font-size: 72px;
+  font-weight: 200;
+  letter-spacing: -2px;
+}
+
+.time-seconds {
+  font-size: 36px;
+  font-weight: 200;
+  opacity: 0.6;
+}
+
+.clock-date {
+  font-size: 18px;
+  opacity: 0.8;
+}
+
+.clock-actions {
+  display: flex;
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.clock-button {
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 25px;
+  transition: all 0.2s;
+}
+
+.clock-button.selected {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+/* Maps App */
+.maps-ui {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.map-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.map-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #1a3a1a;
+  position: relative;
+}
+
+.map-marker {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  z-index: 2;
+}
+
+.map-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  width: 100%;
+  height: 100%;
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.map-tile {
+  background: #0d2d0d;
+}
+
+.map-search {
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.map-search-input {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+}
+
+.map-quick-actions {
+  display: flex;
+  gap: 10px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.7);
+  overflow-x: auto;
+}
+
+.map-action {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.map-action.selected {
+  background: rgba(26, 188, 156, 0.3);
+  transform: scale(1.05);
+}
+
+/* Photos App */
+.photos-ui {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 20px;
+}
+
+.photos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.photos-header h3 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.photo-count {
+  opacity: 0.6;
+  font-size: 14px;
+}
+
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.photo-item {
+  aspect-ratio: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photo-item.selected {
+  transform: scale(0.95);
+  outline: 2px solid rgba(231, 76, 60, 0.8);
+  outline-offset: 2px;
+}
+
+.photo-placeholder {
+  font-size: 32px;
+  opacity: 0.3;
+}
+
+/* Camera App */
+.camera-ui {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #000;
+}
+
+.camera-viewfinder {
+  flex: 1;
+  position: relative;
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-grid-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.grid-line {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.grid-line.horizontal {
+  width: 100%;
+  height: 1px;
+  top: 33.33%;
+}
+
+.grid-line.horizontal:last-of-type {
+  top: 66.66%;
+}
+
+.grid-line.vertical {
+  height: 100%;
+  width: 1px;
+  left: 33.33%;
+}
+
+.grid-line.vertical:last-of-type {
+  left: 66.66%;
+}
+
+.camera-focus-square {
+  width: 80px;
+  height: 80px;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 4px;
+}
+
+.camera-controls {
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.camera-modes {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.camera-mode {
+  padding: 8px 16px;
+  font-size: 14px;
+  opacity: 0.6;
+  transition: all 0.2s;
+}
+
+.camera-mode.selected {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.camera-shutter {
+  display: flex;
+  justify-content: center;
+}
+
+.shutter-button {
+  width: 70px;
+  height: 70px;
+  background: white;
+  border-radius: 50%;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Weather App */
+.weather-ui {
+  display: flex;
+  flex-direction: column;
+  padding: 30px;
+  height: 100%;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+}
+
+.weather-current {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.weather-location {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.weather-temp {
+  font-size: 72px;
+  font-weight: 200;
+  margin: 10px 0;
+}
+
+.weather-condition {
+  font-size: 18px;
+  opacity: 0.8;
+  margin-bottom: 20px;
+}
+
+.weather-icon {
+  font-size: 64px;
+}
+
+.weather-details {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 40px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+}
+
+.weather-detail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.detail-label {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.detail-value {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.weather-forecast {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.forecast-day {
+  flex: 1;
+  text-align: center;
+  padding: 15px 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+
+.forecast-day.selected {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.forecast-day-name {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 5px;
+}
+
+.forecast-icon {
+  font-size: 24px;
+  margin: 5px 0;
+}
+
+.forecast-temp {
+  font-size: 16px;
+}
+
+/* Notes App */
+.notes-ui {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  height: 100%;
+  background: #1a1a1a;
+}
+
+.notes-list {
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-y: auto;
+}
+
+.note-item {
+  padding: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.note-item.selected {
+  background: rgba(241, 196, 15, 0.1);
+  border-left: 3px solid #f1c40f;
+}
+
+.note-title {
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.note-preview {
+  font-size: 14px;
+  opacity: 0.6;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.note-date {
+  font-size: 12px;
+  opacity: 0.4;
+}
+
+.note-editor {
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-toolbar {
+  display: flex;
+  gap: 10px;
+  padding: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.toolbar-btn {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toolbar-btn.selected {
+  background: rgba(241, 196, 15, 0.3);
+}
+
+.editor-content {
+  flex: 1;
+  padding: 15px;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 16px;
+  resize: none;
+  font-family: inherit;
+}
+
+/* Music App */
+.music-ui {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px;
+  gap: 30px;
+}
+
+.album-art {
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.album-placeholder {
+  font-size: 72px;
+}
+
+.track-info {
+  text-align: center;
+}
+
+.track-title {
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.track-artist {
+  font-size: 18px;
+  opacity: 0.7;
+}
+
+.playback-progress {
+  width: 100%;
+  max-width: 300px;
+}
+
+.progress-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.progress-filled {
+  height: 100%;
+  background: #f39c12;
+  transition: width 0.3s;
+}
+
+.time-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.playback-controls {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.control-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 32px;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 10px;
+}
+
+.control-btn.selected {
+  transform: scale(1.2);
+  opacity: 1;
+}
+
+.control-btn.play {
+  font-size: 48px;
+}
+
+/* Mail App */
+.mail-ui {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.mail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mail-header h3 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.mail-count {
+  font-size: 14px;
+  opacity: 0.6;
+}
+
+.mail-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.mail-item {
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s;
+  position: relative;
+}
+
+.mail-item.selected {
+  background: rgba(52, 73, 94, 0.3);
+  border-left: 3px solid #34495e;
+}
+
+.mail-from {
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.mail-subject {
+  margin-bottom: 5px;
+}
+
+.mail-preview {
+  font-size: 14px;
+  opacity: 0.6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mail-time {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 12px;
+  opacity: 0.5;
+}
+
+/* Settings App */
+.settings-ui {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.settings-header {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.settings-header h3 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.settings-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.setting-item.selected {
+  background: rgba(149, 165, 166, 0.1);
+}
+
+.setting-icon {
+  font-size: 24px;
+  margin-right: 15px;
+}
+
+.setting-title {
+  flex: 1;
+  font-size: 16px;
+}
+
+.setting-value {
+  font-size: 14px;
+  opacity: 0.6;
+  margin-right: 10px;
+}
+
+.setting-arrow {
+  font-size: 18px;
+  opacity: 0.4;
+}
+
+/* Messages App */
+.messages-ui {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.messages-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.messages-header h3 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.compose-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: white;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.compose-btn:hover {
+  opacity: 1;
+}
+
+.conversations-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.conversation-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.conversation-item.selected {
+  background: rgba(46, 204, 113, 0.1);
+}
+
+.convo-avatar {
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 20px;
+}
+
+.convo-details {
+  flex: 1;
+}
+
+.convo-name {
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.convo-message {
+  font-size: 14px;
+  opacity: 0.6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.convo-time {
+  font-size: 12px;
+  opacity: 0.5;
+}
+
+.message-input-area {
+  display: flex;
+  gap: 10px;
+  padding: 15px 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.message-input {
+  flex: 1;
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 20px;
+  color: white;
+  font-size: 16px;
+}
+
+.send-btn {
+  padding: 10px 20px;
+  background: #2ecc71;
+  border: none;
+  border-radius: 20px;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.send-btn:hover {
+  background: #27ae60;
+}

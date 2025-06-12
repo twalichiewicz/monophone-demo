@@ -1,25 +1,26 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import './MobileOS.css'
+import { ClockUI, MapsUI, PhotosUI, CameraUI, WeatherUI, NotesUI, MusicUI, MailUI, SettingsUI, MessagesUI } from './AppUIs'
 
 interface MobileOSProps {
   selectedIndex: number
   isPressed: boolean
   openApp: string | null
   isAnimating: boolean
+  appSelectedIndex?: number
 }
 
 const apps = [
-  { name: 'Lab', icon: 'beaker', isImage: true, color: '#2ecc71' },
-  { name: 'Camera', icon: '📷', color: '#3498db' },
-  { name: 'Photos', icon: '🖼️', color: '#e74c3c' },
-  { name: 'Music', icon: '🎵', color: '#f39c12' },
-  { name: 'Settings', icon: '⚙️', color: '#95a5a6' },
-  { name: 'Calendar', icon: '📅', color: '#9b59b6' },
+  { name: 'Clock', icon: '⏰', color: '#e67e22' },
   { name: 'Maps', icon: '🗺️', color: '#1abc9c' },
+  { name: 'Photos', icon: '🖼️', color: '#e74c3c' },
+  { name: 'Camera', icon: '📷', color: '#3498db' },
   { name: 'Weather', icon: '☀️', color: '#3498db' },
   { name: 'Notes', icon: '📝', color: '#f1c40f' },
-  { name: 'Clock', icon: '⏰', color: '#e67e22' },
+  { name: 'Music', icon: '🎵', color: '#f39c12' },
   { name: 'Mail', icon: '✉️', color: '#34495e' },
+  { name: 'Settings', icon: '⚙️', color: '#95a5a6' },
+  { name: 'Messages', icon: '💬', color: '#2ecc71' },
   { name: 'Flip', icon: '↻', color: '#8e44ad' },
 ]
 
@@ -29,7 +30,55 @@ const dockApps = [
   { name: 'Music', icon: '🎵', color: '#e74c3c' },
 ]
 
-const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, isAnimating }) => {
+const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, isAnimating, appSelectedIndex: propAppSelectedIndex }) => {
+  const [localAppSelectedIndex, setLocalAppSelectedIndex] = useState(0)
+  const appSelectedIndex = propAppSelectedIndex ?? localAppSelectedIndex
+  
+  useEffect(() => {
+    setLocalAppSelectedIndex(0)
+  }, [openApp])
+  
+  const handleAppNavigate = () => {
+    // This would be connected to the actual navigation
+    // For now, just cycle through indices
+    setLocalAppSelectedIndex(prev => (prev + 1) % 10)
+  }
+  
+  const renderAppUI = (appIndex: number, selectedIdx: number, onNavigate: (direction: 'up' | 'down' | 'left' | 'right') => void) => {
+    const appName = apps[appIndex]?.name
+    
+    switch (appName) {
+      case 'Clock':
+        return <ClockUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+      case 'Maps':
+        return <MapsUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+      case 'Photos':
+        return <PhotosUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+      case 'Camera':
+        return <CameraUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+      case 'Weather':
+        return <WeatherUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+      case 'Notes':
+        return <NotesUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+      case 'Music':
+        return <MusicUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+      case 'Mail':
+        return <MailUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+      case 'Settings':
+        return <SettingsUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+      case 'Messages':
+        return <MessagesUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+      default:
+        return (
+          <>
+            <div className="app-icon-large">
+              {apps[appIndex]?.icon}
+            </div>
+            <p>Swipe up or click trackpad to close</p>
+          </>
+        )
+    }
+  }
   const currentTime = new Date().toLocaleTimeString('en-US', { 
     hour: '2-digit', 
     minute: '2-digit',
@@ -86,10 +135,7 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, 
             <div className="app-close">✕</div>
           </div>
           <div className="app-content">
-            <div className="app-icon-large">
-              {apps[parseInt(openApp.split('-')[1])]?.icon}
-            </div>
-            <p>Swipe up or click trackpad to close</p>
+            {renderAppUI(parseInt(openApp.split('-')[1]), appSelectedIndex, handleAppNavigate)}
           </div>
           <div className="app-nav-bar">
             <div className="nav-item">

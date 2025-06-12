@@ -1,7 +1,10 @@
 import React from 'react'
+import { QRCodeSVG } from 'qrcode.react'
 import './DesktopModal.css'
 
 const DesktopModal: React.FC = () => {
+  const currentUrl = window.location.href
+  
   return (
     <div className="desktop-modal-overlay">
       <div className="desktop-modal">
@@ -10,10 +13,20 @@ const DesktopModal: React.FC = () => {
         <p className="modal-subtitle">
           This prototype is designed for mobile devices.
         </p>
+        <div className="qr-code-container">
+          <QRCodeSVG 
+            value={currentUrl} 
+            size={200}
+            level="H"
+            includeMargin={true}
+            bgColor="#1a1a1a"
+            fgColor="#ffffff"
+          />
+        </div>
         <div className="modal-instructions">
           <div className="instruction-item">
             <span className="instruction-number">1</span>
-            <span>Visit this page on your phone</span>
+            <span>Scan QR code or visit this page on your phone</span>
           </div>
           <div className="instruction-item">
             <span className="instruction-number">2</span>
@@ -25,8 +38,8 @@ const DesktopModal: React.FC = () => {
           </div>
         </div>
         <div className="modal-footer">
-          <p className="url-hint">Scan QR code or visit:</p>
-          <code className="current-url">{window.location.href}</code>
+          <p className="url-hint">Or visit:</p>
+          <code className="current-url">{currentUrl}</code>
         </div>
       </div>
     </div>

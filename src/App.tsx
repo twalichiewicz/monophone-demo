@@ -15,6 +15,7 @@ function App() {
   const [openApp, setOpenApp] = useState<string | null>(null)
   const [isAnimating, setIsAnimating] = useState(false)
   const [showSpatialView, setShowSpatialView] = useState(false)
+  const [appSelectedIndex, setAppSelectedIndex] = useState(0)
   const lastNavTimeRef = useRef(0)
   const navCooldown = 200 // ms between navigation
 
@@ -33,6 +34,20 @@ function App() {
     const adjustedX = isFlipped ? -direction.x : direction.x
     const adjustedY = isFlipped ? direction.y : -direction.y
     const angle = Math.atan2(adjustedY, adjustedX) * (180 / Math.PI)
+    
+    // If app is open, handle app-specific navigation
+    if (openApp) {
+      // Update app-specific selection based on direction
+      setAppSelectedIndex((prev) => {
+        // Simple cycling through items for now
+        // Each app can have different navigation logic
+        return (prev + 1) % 10
+      })
+      
+      lastNavTimeRef.current = now
+      triggerHaptic('light')
+      return
+    }
     
     // Determine direction based on angle (now with 4 columns)
     let moved = false
@@ -86,8 +101,8 @@ function App() {
     // Play click sound with variation
     clickSoundManager.playClick()
     
-    // Check if flip app was selected
-    if (selectedIndex === 11 && !openApp) {
+    // Check if flip app was selected (Flip is now at index 10)
+    if (selectedIndex === 10 && !openApp) {
       setIsFlipped(!isFlipped)
       document.querySelector('.app')?.classList.toggle('flipped')
       return
@@ -96,6 +111,7 @@ function App() {
     // Open app animation
     if (!openApp && !isAnimating) {
       setIsAnimating(true)
+      setAppSelectedIndex(0) // Reset app navigation when opening new app
       setTimeout(() => {
         setOpenApp(`app-${selectedIndex}`)
         setIsAnimating(false)
@@ -149,6 +165,7 @@ function App() {
           isPressed={isPressed} 
           openApp={openApp}
           isAnimating={isAnimating}
+          appSelectedIndex={appSelectedIndex}
         />
       </PhoneMockup>
       <TrackNub

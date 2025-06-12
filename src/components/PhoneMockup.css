@@ -12,7 +12,7 @@
   position: relative;
   width: 375px;
   height: 812px;
-  background: #1a1a1a;
+  background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
   border-radius: 40px;
   padding: 10px;
   box-shadow: 
@@ -43,14 +43,6 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  clip-path: polygon(
-    0 0,
-    100% 0,
-    100% calc(100% - 80px),
-    calc(100% - 80px) calc(100% - 80px),
-    calc(100% - 80px) 100%,
-    0 100%
-  );
 }
 
 .phone-home-indicator {
@@ -83,13 +75,18 @@
   
   .phone-screen {
     border-radius: 0;
-    clip-path: polygon(
-      0 0,
-      100% 0,
-      100% calc(100% - 180px),
-      calc(100% - 180px) calc(100% - 180px),
-      calc(100% - 180px) 100%,
-      0 100%
-    );
+    position: relative;
+  }
+  
+  .phone-screen::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 90px;
+    height: 90px;
+    background: #0a0a0a;
+    border-radius: 45px 0 0 0;
+    z-index: 100;
   }
 }

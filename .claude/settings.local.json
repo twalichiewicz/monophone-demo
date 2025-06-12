@@ -10,7 +10,10 @@
       "Bash(npm run build:*)",
       "Bash(find:*)",
       "Bash(ls:*)",
-      "Bash(git remote set-url:*)"
+      "Bash(git remote set-url:*)",
+      "Bash(rm:*)",
+      "Bash(npm install:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }

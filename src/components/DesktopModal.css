@@ -41,6 +41,15 @@
   margin-bottom: 32px;
 }
 
+.qr-code-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 32px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
 .modal-instructions {
   display: flex;
   flex-direction: column;

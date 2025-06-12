@@ -11,10 +11,12 @@ export class ClickSoundManager {
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
       
       // Load the original sound
+      console.log('Loading click sound from:', clickSoundUrl)
       const response = await fetch(clickSoundUrl)
       const arrayBuffer = await response.arrayBuffer()
       this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer)
       
+      console.log('Click sound loaded successfully')
       // Create variations
       this.createVariations()
     } catch (error) {
@@ -45,12 +47,21 @@ export class ClickSoundManager {
   }
   
   playClick() {
-    if (!this.audioContext) return
+    if (!this.audioContext) {
+      console.log('No audio context available')
+      return
+    }
+    
+    // Resume audio context if suspended (for mobile browsers)
+    if (this.audioContext.state === 'suspended') {
+      this.audioContext.resume()
+    }
     
     // Randomly select a variation
     const variation = Math.floor(Math.random() * 5)
     
     if (this.audioBuffer && this.variations.length > 0) {
+      console.log('Playing loaded click sound')
       // Play the loaded sound
       const source = this.audioContext.createBufferSource()
       const gainNode = this.audioContext.createGain()
@@ -65,6 +76,7 @@ export class ClickSoundManager {
       
       source.start()
     } else {
+      console.log('Using fallback generated sound')
       // Fallback to generated sound
       this.playGeneratedClick(variation)
     }
