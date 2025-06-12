@@ -25,6 +25,8 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
   const tickIntervalRef = useRef<number | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
   const longPressTimerRef = useRef<number | null>(null)
+  const isTouchRef = useRef(false)
+  const soundPlayedRef = useRef(false)
 
   useEffect(() => {
     // Initialize click sound manager
@@ -114,6 +116,7 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
       setIsPressed(false)
       lastDirectionRef.current = { x: 0, y: 0 }
       stopTicking()
+      soundPlayedRef.current = false
     }
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -194,10 +197,19 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault()
+    
+    // Ignore mouse events if touch was used
+    if (isTouchRef.current) return
+    
     setIsDragging(true)
     setIsPressed(true)
     triggerHaptic('medium')
-    clickSoundManager.playClick()
+    
+    // Only play sound if not already played
+    if (!soundPlayedRef.current) {
+      clickSoundManager.playClick()
+      soundPlayedRef.current = true
+    }
     
     const rect = nubRef.current!.getBoundingClientRect()
     centerRef.current = {
@@ -212,6 +224,10 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault()
+    
+    // Ignore mouse events if touch was used
+    if (isTouchRef.current) return
+    
     if (Math.abs(position.x) < 5 && Math.abs(position.y) < 5 && !isLongPress) {
       triggerHaptic('heavy')
       onClick()
@@ -221,11 +237,20 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
   const handleTouchStart = (e: React.TouchEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    
+    // Mark that we're using touch
+    isTouchRef.current = true
+    
     const touch = e.touches[0]
     setIsDragging(true)
     setIsPressed(true)
     triggerHaptic('medium')
-    clickSoundManager.playClick()
+    
+    // Only play sound if not already played
+    if (!soundPlayedRef.current) {
+      clickSoundManager.playClick()
+      soundPlayedRef.current = true
+    }
     
     // Use touch start position as center for more precise control
     centerRef.current = {
@@ -267,6 +292,14 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
     setIsPressed(false)
     lastDirectionRef.current = { x: 0, y: 0 }
     stopTicking()
+    
+    // Reset flags
+    soundPlayedRef.current = false
+    
+    // Reset touch flag after a delay to allow mouse events again
+    setTimeout(() => {
+      isTouchRef.current = false
+    }, 500)
   }
 
   return (
@@ -277,6 +310,7 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
     >
       <div className="trackpad-surface"></div>
       <div className="click-zones">
