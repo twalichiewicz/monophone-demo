@@ -310,7 +310,9 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
     >
-      <div className="trackpad-surface"></div>
+      <div className="trackpad-surface">
+        <div className="texture-layer"></div>
+      </div>
       <div className="click-zones">
         <div className="click-zone"></div>
         <div className="click-zone"></div>
