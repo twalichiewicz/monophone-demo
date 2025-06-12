@@ -8,6 +8,8 @@ interface MobileOSProps {
   openApp: string | null
   isAnimating: boolean
   appSelectedIndex?: number
+  onAppClick: (index: number) => void
+  onCloseApp: () => void
 }
 
 const apps = [
@@ -30,7 +32,7 @@ const dockApps = [
   { name: 'Music', icon: '🎵', color: '#e74c3c' },
 ]
 
-const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, isAnimating, appSelectedIndex: propAppSelectedIndex }) => {
+const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, isAnimating, appSelectedIndex: propAppSelectedIndex, onAppClick, onCloseApp }) => {
   const [localAppSelectedIndex, setLocalAppSelectedIndex] = useState(0)
   const appSelectedIndex = propAppSelectedIndex ?? localAppSelectedIndex
   
@@ -117,6 +119,7 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, 
             style={{
               '--app-color': app.color
             } as React.CSSProperties}
+            onClick={() => onAppClick(index)}
           >
             <div className="app-icon-content">
               <span className="app-emoji">{app.icon}</span>
@@ -132,23 +135,23 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, 
         } as React.CSSProperties}>
           <div className="app-header">
             <div className="app-title">{apps[parseInt(openApp.split('-')[1])]?.name}</div>
-            <div className="app-close">✕</div>
+            <div className="app-close" onClick={onCloseApp}>✕</div>
           </div>
           <div className="app-content">
             {renderAppUI(parseInt(openApp.split('-')[1]), appSelectedIndex, handleAppNavigate)}
           </div>
           <div className="app-nav-bar">
             <div className="nav-item">
-              <span className="nav-icon">←</span>
+              <span className="nav-icon">◀</span>
               <span className="nav-label">Back</span>
             </div>
             <div className="nav-item">
-              <span className="nav-icon">⏺</span>
+              <span className="nav-icon">●</span>
               <span className="nav-label">Home</span>
             </div>
             <div className="nav-item">
-              <span className="nav-icon">⋮</span>
-              <span className="nav-label">More</span>
+              <span className="nav-icon">■</span>
+              <span className="nav-label">Recent</span>
             </div>
           </div>
         </div>
@@ -165,6 +168,7 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, 
               style={{
                 '--app-color': app.color
               } as React.CSSProperties}
+              onClick={() => onAppClick(12 + index)}
             >
               <div className="dock-app-content">
                 <span className="dock-app-emoji">{app.icon}</span>

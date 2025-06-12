@@ -43,6 +43,15 @@
   background: rgba(255, 255, 255, 0.1);
   border-radius: 25px;
   transition: all 0.2s;
+  cursor: pointer;
+}
+
+.clock-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.clock-button:active {
+  transform: scale(0.95);
 }
 
 .clock-button.selected {
@@ -122,6 +131,15 @@
   border-radius: 20px;
   white-space: nowrap;
   transition: all 0.2s;
+  cursor: pointer;
+}
+
+.map-action:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.map-action:active {
+  transform: scale(0.95);
 }
 
 .map-action.selected {
@@ -535,6 +553,15 @@
   cursor: pointer;
   transition: all 0.2s;
   padding: 10px;
+  border-radius: 50%;
+}
+
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.control-btn:active {
+  transform: scale(0.9);
 }
 
 .control-btn.selected {

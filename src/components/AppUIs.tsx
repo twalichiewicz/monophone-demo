@@ -7,11 +7,12 @@ interface AppUIProps {
   onNavigate: (direction: 'up' | 'down' | 'left' | 'right') => void
 }
 
-export const ClockUI: React.FC<AppUIProps> = () => {
+export const ClockUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
   const now = new Date()
   const hours = now.getHours().toString().padStart(2, '0')
   const minutes = now.getMinutes().toString().padStart(2, '0')
   const seconds = now.getSeconds().toString().padStart(2, '0')
+  const buttons = ['Alarm', 'Timer', 'Stopwatch']
   
   return (
     <div className="clock-ui">
@@ -23,9 +24,11 @@ export const ClockUI: React.FC<AppUIProps> = () => {
         {now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
       </div>
       <div className="clock-actions">
-        <div className="clock-button selected">Alarm</div>
-        <div className="clock-button">Timer</div>
-        <div className="clock-button">Stopwatch</div>
+        {buttons.map((button, i) => (
+          <div key={i} className={`clock-button ${i === selectedIndex ? 'selected' : ''}`}>
+            {button}
+          </div>
+        ))}
       </div>
     </div>
   )
@@ -115,7 +118,9 @@ export const CameraUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
   )
 }
 
-export const WeatherUI: React.FC<AppUIProps> = () => {
+export const WeatherUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+  
   return (
     <div className="weather-ui">
       <div className="weather-current">
@@ -139,8 +144,8 @@ export const WeatherUI: React.FC<AppUIProps> = () => {
         </div>
       </div>
       <div className="weather-forecast">
-        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((day, i) => (
-          <div key={i} className={`forecast-day ${i === 0 ? 'selected' : ''}`}>
+        {days.map((day, i) => (
+          <div key={i} className={`forecast-day ${i === selectedIndex ? 'selected' : ''}`}>
             <div className="forecast-day-name">{day}</div>
             <div className="forecast-icon">☀️</div>
             <div className="forecast-temp">75°</div>

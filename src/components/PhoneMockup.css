@@ -76,17 +76,6 @@
   .phone-screen {
     border-radius: 0;
     position: relative;
-  }
-  
-  .phone-screen::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 90px;
-    height: 90px;
-    background: #0a0a0a;
-    border-radius: 45px 0 0 0;
-    z-index: 100;
+    overflow: hidden;
   }
 }
