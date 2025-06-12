@@ -110,7 +110,26 @@ function App() {
     triggerHaptic('heavy')
     clickSoundManager.playClick()
     
-    // Increment tap count
+    if (!openApp) {
+      // On springboard - immediately open app
+      if (selectedIndex === 10) {
+        // Flip app
+        setIsFlipped(!isFlipped)
+        document.querySelector('.app')?.classList.toggle('flipped')
+      } else if (!isAnimating) {
+        // Open selected app
+        setIsAnimating(true)
+        setAppSelectedIndex(0)
+        setTimeout(() => {
+          setOpenApp(`app-${selectedIndex}`)
+          setIsAnimating(false)
+        }, 300)
+      }
+      setTimeout(() => setIsPressed(false), 100)
+      return
+    }
+    
+    // In app - handle single/double tap
     tapCountRef.current += 1
     
     // Clear existing timer
@@ -123,7 +142,7 @@ function App() {
       const taps = tapCountRef.current
       tapCountRef.current = 0 // Reset tap count
       
-      if (taps === 2 && openApp) {
+      if (taps === 2) {
         // Double tap in app - go home
         triggerHaptic('medium')
         setTimeout(() => triggerHaptic('medium'), 50)
@@ -134,28 +153,10 @@ function App() {
           setIsAnimating(false)
         }, 300)
       } else if (taps === 1) {
-        // Single tap
-        if (openApp) {
-          // Single tap in app - click the selected element
-          const selectedElement = document.querySelector('.selected') as HTMLElement
-          if (selectedElement) {
-            selectedElement.click()
-          }
-        } else {
-          // Single tap on home screen - open app
-          if (selectedIndex === 10) {
-            // Flip app
-            setIsFlipped(!isFlipped)
-            document.querySelector('.app')?.classList.toggle('flipped')
-          } else if (!isAnimating) {
-            // Open selected app
-            setIsAnimating(true)
-            setAppSelectedIndex(0)
-            setTimeout(() => {
-              setOpenApp(`app-${selectedIndex}`)
-              setIsAnimating(false)
-            }, 300)
-          }
+        // Single tap in app - click the selected element
+        const selectedElement = document.querySelector('.selected') as HTMLElement
+        if (selectedElement) {
+          selectedElement.click()
         }
       }
     }, doubleTapDelay)
