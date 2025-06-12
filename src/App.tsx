@@ -18,7 +18,8 @@ function App() {
   const [appSelectedIndex, setAppSelectedIndex] = useState(0)
   const lastNavTimeRef = useRef(0)
   const navCooldown = 200 // ms between navigation
-  const lastClickTimeRef = useRef(0)
+  const tapCountRef = useRef(0)
+  const tapTimerRef = useRef<number | null>(null)
   const doubleTapDelay = 300 // ms for double tap detection
 
   const handleDirectionInput = (direction: { x: number; y: number }) => {
@@ -107,18 +108,23 @@ function App() {
   const handleClick = () => {
     setIsPressed(true)
     triggerHaptic('heavy')
-    
-    // Play click sound with variation
     clickSoundManager.playClick()
     
-    const now = Date.now()
-    const timeSinceLastClick = now - lastClickTimeRef.current
+    // Increment tap count
+    tapCountRef.current += 1
     
-    // Check for double tap
-    if (timeSinceLastClick < doubleTapDelay && lastClickTimeRef.current > 0) {
-      // Double tap detected - go home
-      if (openApp) {
-        // Play double tap feedback
+    // Clear existing timer
+    if (tapTimerRef.current) {
+      clearTimeout(tapTimerRef.current)
+    }
+    
+    // Set timer for tap detection
+    tapTimerRef.current = window.setTimeout(() => {
+      const taps = tapCountRef.current
+      tapCountRef.current = 0 // Reset tap count
+      
+      if (taps === 2 && openApp) {
+        // Double tap detected - go home
         triggerHaptic('medium')
         setTimeout(() => triggerHaptic('medium'), 50)
         
@@ -127,40 +133,28 @@ function App() {
           setOpenApp(null)
           setIsAnimating(false)
         }, 300)
+      } else if (taps === 1) {
+        // Single tap
+        if (openApp) {
+          // Single tap in app - do nothing (just haptic feedback already done)
+        } else {
+          // Single tap on home screen
+          if (selectedIndex === 10) {
+            // Flip app
+            setIsFlipped(!isFlipped)
+            document.querySelector('.app')?.classList.toggle('flipped')
+          } else if (!isAnimating) {
+            // Open selected app
+            setIsAnimating(true)
+            setAppSelectedIndex(0)
+            setTimeout(() => {
+              setOpenApp(`app-${selectedIndex}`)
+              setIsAnimating(false)
+            }, 300)
+          }
+        }
       }
-      lastClickTimeRef.current = 0 // Reset to prevent triple tap
-      setTimeout(() => setIsPressed(false), 100)
-      return
-    }
-    
-    // Record this click time for potential double-tap
-    lastClickTimeRef.current = now
-    
-    // Single tap behavior when app is open
-    if (openApp) {
-      // Single taps in apps don't close the app
-      // They just provide haptic feedback for now
-      // App-specific actions could be added here
-      setTimeout(() => setIsPressed(false), 100)
-      return
-    }
-    
-    // Check if flip app was selected (Flip is now at index 10)
-    if (selectedIndex === 10 && !openApp) {
-      setIsFlipped(!isFlipped)
-      document.querySelector('.app')?.classList.toggle('flipped')
-      return
-    }
-    
-    // Open app animation (only when no app is open)
-    if (!openApp && !isAnimating) {
-      setIsAnimating(true)
-      setAppSelectedIndex(0) // Reset app navigation when opening new app
-      setTimeout(() => {
-        setOpenApp(`app-${selectedIndex}`)
-        setIsAnimating(false)
-      }, 300)
-    }
+    }, doubleTapDelay)
     
     setTimeout(() => setIsPressed(false), 100)
   }
@@ -354,6 +348,10 @@ function App() {
     return () => {
       document.removeEventListener('touchmove', preventScroll)
       window.removeEventListener('resize', checkMobile)
+      // Clear tap timer on unmount
+      if (tapTimerRef.current) {
+        clearTimeout(tapTimerRef.current)
+      }
     }
   }, [])
 
