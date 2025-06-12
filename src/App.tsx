@@ -155,9 +155,14 @@ function App() {
       } else if (taps === 1) {
         // Single tap in app - click the selected element
         const selectedElement = document.querySelector('.selected') as HTMLElement
-        if (selectedElement) {
+        if (selectedElement && selectedElement.classList.contains('app-close-button')) {
+          // User selected the close button - close the app
+          selectedElement.click()
+        } else if (selectedElement) {
+          // Click any other selected element
           selectedElement.click()
         }
+        // Single tap does NOT close the app unless close button is selected
       }
     }, doubleTapDelay)
     
