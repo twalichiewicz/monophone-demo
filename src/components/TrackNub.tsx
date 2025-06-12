@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import './TrackNub.css'
+import { clickSoundManager } from '../utils/audioUtils'
 
 interface TrackNubProps {
   onDirectionInput: (direction: { x: number; y: number }) => void
@@ -24,6 +25,11 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
   const tickIntervalRef = useRef<number | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
   const longPressTimerRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    // Initialize click sound manager
+    clickSoundManager.init()
+  }, [])
 
   const initAudio = () => {
     if (!audioContextRef.current) {
@@ -191,6 +197,7 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
     setIsDragging(true)
     setIsPressed(true)
     triggerHaptic('medium')
+    clickSoundManager.playClick()
     
     const rect = nubRef.current!.getBoundingClientRect()
     centerRef.current = {
@@ -207,7 +214,6 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
     e.preventDefault()
     if (Math.abs(position.x) < 5 && Math.abs(position.y) < 5 && !isLongPress) {
       triggerHaptic('heavy')
-      // Sound is played in App.tsx using clickSoundManager
       onClick()
     }
   }
@@ -219,6 +225,7 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
     setIsDragging(true)
     setIsPressed(true)
     triggerHaptic('medium')
+    clickSoundManager.playClick()
     
     // Use touch start position as center for more precise control
     centerRef.current = {
@@ -253,7 +260,6 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
     cancelLongPress()
     if (Math.abs(position.x) < 5 && Math.abs(position.y) < 5 && !isLongPress) {
       triggerHaptic('heavy')
-      // Sound is played in App.tsx using clickSoundManager
       onClick()
     }
     setIsDragging(false)
