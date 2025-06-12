@@ -2,44 +2,66 @@
 import clickSoundMp3 from '../assets/mobileClick.mp3'
 
 export class ClickSoundManager {
-  private audio: HTMLAudioElement | null = null
+  private audioPool: HTMLAudioElement[] = []
+  private poolSize = 5
+  private currentIndex = 0
   private isInitialized = false
   
   init() {
     if (this.isInitialized) return
     
     try {
-      // Use HTML Audio element instead of Web Audio API
-      this.audio = new Audio(clickSoundMp3)
-      this.audio.volume = 0.5
-      this.audio.preload = 'auto'
-      
-      // Pre-load the audio
-      this.audio.load()
+      // Create a pool of audio elements for instant playback
+      for (let i = 0; i < this.poolSize; i++) {
+        const audio = new Audio(clickSoundMp3)
+        audio.volume = 0.5
+        audio.preload = 'auto'
+        
+        // Force load the audio
+        audio.load()
+        
+        // Pre-play and pause to fully cache the audio
+        audio.play().then(() => {
+          audio.pause()
+          audio.currentTime = 0
+        }).catch(() => {
+          // Ignore autoplay errors during init
+        })
+        
+        this.audioPool.push(audio)
+      }
       
       this.isInitialized = true
-      console.log('Click sound initialized')
+      console.log('Click sound pool initialized with', this.poolSize, 'instances')
     } catch (error) {
       console.error('Failed to initialize click sound:', error)
     }
   }
   
   playClick() {
-    if (!this.audio) {
+    if (!this.isInitialized || this.audioPool.length === 0) {
       this.init()
+      return
     }
     
-    if (this.audio) {
-      try {
-        // Clone the audio to allow overlapping sounds
-        const audioClone = this.audio.cloneNode() as HTMLAudioElement
-        audioClone.volume = 0.5
-        audioClone.play().catch(err => {
+    try {
+      // Get the next audio element from the pool
+      const audio = this.audioPool[this.currentIndex]
+      
+      // Reset and play immediately
+      audio.currentTime = 0
+      const playPromise = audio.play()
+      
+      if (playPromise !== undefined) {
+        playPromise.catch(err => {
           console.warn('Failed to play click sound:', err)
         })
-      } catch (error) {
-        console.error('Error playing click sound:', error)
       }
+      
+      // Move to next audio element in pool
+      this.currentIndex = (this.currentIndex + 1) % this.poolSize
+    } catch (error) {
+      console.error('Error playing click sound:', error)
     }
   }
 }

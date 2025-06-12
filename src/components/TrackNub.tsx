@@ -30,6 +30,21 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
   useEffect(() => {
     // Initialize sound on component mount
     clickSoundManager.init()
+    
+    // Also initialize on first user interaction for mobile browsers
+    const initOnInteraction = () => {
+      clickSoundManager.init()
+      document.removeEventListener('touchstart', initOnInteraction)
+      document.removeEventListener('mousedown', initOnInteraction)
+    }
+    
+    document.addEventListener('touchstart', initOnInteraction, { passive: true })
+    document.addEventListener('mousedown', initOnInteraction, { passive: true })
+    
+    return () => {
+      document.removeEventListener('touchstart', initOnInteraction)
+      document.removeEventListener('mousedown', initOnInteraction)
+    }
   }, [])
 
 
@@ -95,7 +110,7 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
       
       // Only play sound if it was a quick press-release without dragging
       const pressDuration = Date.now() - pressTimeRef.current
-      if (pressDuration < 300 && !hasDraggedRef.current && pressTimeRef.current > 0) {
+      if (pressDuration < 500 && !hasDraggedRef.current && pressTimeRef.current > 0) {
         clickSoundManager.playClick()
       }
       
@@ -269,7 +284,7 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
     
     // Only play sound if it was a quick press-release without dragging
     const pressDuration = Date.now() - pressTimeRef.current
-    if (pressDuration < 300 && !hasDraggedRef.current && pressTimeRef.current > 0) {
+    if (pressDuration < 500 && !hasDraggedRef.current && pressTimeRef.current > 0) {
       clickSoundManager.playClick()
     }
     
