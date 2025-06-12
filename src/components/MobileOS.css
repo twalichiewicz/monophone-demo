@@ -229,42 +229,65 @@
 
 .app-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 50px 20px 20px;
+  flex-direction: column;
   background: rgba(0, 0, 0, 0.2);
   position: relative;
   z-index: 10;
+}
+
+.app-close-bar {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.app-close-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white;
+  font-size: 14px;
+}
+
+.app-close-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.app-close-button:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.app-close-button.selected {
+  background: rgba(255, 59, 48, 0.8);
+  border-color: rgba(255, 59, 48, 1);
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+.close-icon {
+  font-size: 18px;
+  font-weight: 300;
+}
+
+.close-text {
+  font-weight: 500;
 }
 
 .app-title {
   font-size: 24px;
   font-weight: 600;
   color: white;
-}
-
-.app-close {
-  width: 30px;
-  height: 30px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 16px;
-  color: white;
-  font-weight: 300;
-}
-
-.app-close:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.app-close:active {
-  transform: scale(0.9);
-  background: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  padding: 20px;
 }
 
 .app-content {

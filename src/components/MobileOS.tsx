@@ -215,8 +215,13 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, 
           '--app-color': apps[parseInt(openApp.split('-')[1])]?.color || '#333'
         } as React.CSSProperties}>
           <div className="app-header">
+            <div className="app-close-bar">
+              <button className="app-close-button" onClick={onCloseApp} tabIndex={0}>
+                <span className="close-icon">✕</span>
+                <span className="close-text">Close</span>
+              </button>
+            </div>
             <div className="app-title">{apps[parseInt(openApp.split('-')[1])]?.name}</div>
-            <div className="app-close" onClick={onCloseApp}>✕</div>
           </div>
           <div className="app-content">
             {renderAppUI(parseInt(openApp.split('-')[1]), appSelectedIndex, handleAppNavigate)}

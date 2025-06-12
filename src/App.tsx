@@ -124,7 +124,7 @@ function App() {
       tapCountRef.current = 0 // Reset tap count
       
       if (taps === 2 && openApp) {
-        // Double tap detected - go home
+        // Double tap in app - go home
         triggerHaptic('medium')
         setTimeout(() => triggerHaptic('medium'), 50)
         
@@ -136,9 +136,13 @@ function App() {
       } else if (taps === 1) {
         // Single tap
         if (openApp) {
-          // Single tap in app - do nothing (just haptic feedback already done)
+          // Single tap in app - click the selected element
+          const selectedElement = document.querySelector('.selected') as HTMLElement
+          if (selectedElement) {
+            selectedElement.click()
+          }
         } else {
-          // Single tap on home screen
+          // Single tap on home screen - open app
           if (selectedIndex === 10) {
             // Flip app
             setIsFlipped(!isFlipped)
@@ -201,6 +205,7 @@ function App() {
   
   const handleAppNavigation = (direction: 'up' | 'down' | 'left' | 'right') => {
     // Get all focusable elements in the current app
+    const appHeader = document.querySelector('.app-header')
     const appContent = document.querySelector('.app-content')
     const navBar = document.querySelector('.app-nav-bar')
     
@@ -223,13 +228,15 @@ function App() {
       '.clock-button',
       '.camera-mode',
       '.control-btn',
-      '.nav-item'
+      '.nav-item',
+      '.app-close-button'
     ].join(', ')
     
-    // Get all focusable elements from both app content and nav bar
+    // Get all focusable elements from header, content and nav bar
+    const headerFocusable = appHeader ? Array.from(appHeader.querySelectorAll(focusableSelectors)) : []
     const appFocusable = Array.from(appContent.querySelectorAll(focusableSelectors))
     const navFocusable = navBar ? Array.from(navBar.querySelectorAll(focusableSelectors)) : []
-    const allFocusable = [...appFocusable, ...navFocusable]
+    const allFocusable = [...headerFocusable, ...appFocusable, ...navFocusable]
     
     if (allFocusable.length === 0) return
     
