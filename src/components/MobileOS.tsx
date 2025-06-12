@@ -46,6 +46,87 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, 
     setLocalAppSelectedIndex(prev => (prev + 1) % 10)
   }
   
+  const getAppNavItems = (appName: string) => {
+    switch (appName) {
+      case 'Clock':
+        return [
+          { icon: '⏰', label: 'Alarm' },
+          { icon: '⏱️', label: 'Timer' },
+          { icon: '⏲️', label: 'Stopwatch' },
+          { icon: '🌍', label: 'World Clock' }
+        ]
+      case 'Maps':
+        return [
+          { icon: '📍', label: 'Current' },
+          { icon: '🏠', label: 'Home' },
+          { icon: '🏢', label: 'Work' },
+          { icon: '⭐', label: 'Saved' }
+        ]
+      case 'Photos':
+        return [
+          { icon: '📷', label: 'Library' },
+          { icon: '📚', label: 'Albums' },
+          { icon: '🔍', label: 'Search' },
+          { icon: '👤', label: 'For You' }
+        ]
+      case 'Camera':
+        return [
+          { icon: '📸', label: 'Photo' },
+          { icon: '🎥', label: 'Video' },
+          { icon: '👤', label: 'Portrait' },
+          { icon: '🌄', label: 'Pano' }
+        ]
+      case 'Weather':
+        return [
+          { icon: '📍', label: 'My Location' },
+          { icon: '📋', label: 'List' },
+          { icon: '🗺️', label: 'Map' },
+          { icon: '📊', label: 'Details' }
+        ]
+      case 'Notes':
+        return [
+          { icon: '📝', label: 'All Notes' },
+          { icon: '📁', label: 'Folders' },
+          { icon: '➕', label: 'New' },
+          { icon: '🔍', label: 'Search' }
+        ]
+      case 'Music':
+        return [
+          { icon: '🎵', label: 'Library' },
+          { icon: '📻', label: 'Radio' },
+          { icon: '🔍', label: 'Search' },
+          { icon: '👤', label: 'For You' }
+        ]
+      case 'Mail':
+        return [
+          { icon: '📥', label: 'Inbox' },
+          { icon: '✉️', label: 'Compose' },
+          { icon: '📤', label: 'Sent' },
+          { icon: '🗑️', label: 'Trash' }
+        ]
+      case 'Settings':
+        return [
+          { icon: '⚙️', label: 'General' },
+          { icon: '🔔', label: 'Notifications' },
+          { icon: '🔒', label: 'Privacy' },
+          { icon: '♿', label: 'Accessibility' }
+        ]
+      case 'Messages':
+        return [
+          { icon: '💬', label: 'Chats' },
+          { icon: '✏️', label: 'Compose' },
+          { icon: '👤', label: 'Contacts' },
+          { icon: '🔍', label: 'Search' }
+        ]
+      default:
+        return [
+          { icon: '◀', label: 'Back' },
+          { icon: '●', label: 'Home' },
+          { icon: '■', label: 'Recent' }
+        ]
+    }
+  }
+  
   const renderAppUI = (appIndex: number, selectedIdx: number, onNavigate: (direction: 'up' | 'down' | 'left' | 'right') => void) => {
     const appName = apps[appIndex]?.name
     
@@ -141,18 +222,12 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, 
             {renderAppUI(parseInt(openApp.split('-')[1]), appSelectedIndex, handleAppNavigate)}
           </div>
           <div className="app-nav-bar">
-            <div className="nav-item">
-              <span className="nav-icon">◀</span>
-              <span className="nav-label">Back</span>
-            </div>
-            <div className="nav-item">
-              <span className="nav-icon">●</span>
-              <span className="nav-label">Home</span>
-            </div>
-            <div className="nav-item">
-              <span className="nav-icon">■</span>
-              <span className="nav-label">Recent</span>
-            </div>
+            {getAppNavItems(apps[parseInt(openApp.split('-')[1])]?.name).map((item, index) => (
+              <div key={index} className="nav-item">
+                <span className="nav-icon">{item.icon}</span>
+                <span className="nav-label">{item.label}</span>
+              </div>
+            ))}
           </div>
         </div>
       )}
