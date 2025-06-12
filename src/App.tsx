@@ -18,6 +18,8 @@ function App() {
   const [appSelectedIndex, setAppSelectedIndex] = useState(0)
   const lastNavTimeRef = useRef(0)
   const navCooldown = 200 // ms between navigation
+  const lastClickTimeRef = useRef(0)
+  const doubleTapDelay = 300 // ms for double tap detection
 
   const handleDirectionInput = (direction: { x: number; y: number }) => {
     // Handle omnidirectional navigation with cooldown
@@ -108,6 +110,30 @@ function App() {
     
     // Play click sound with variation
     clickSoundManager.playClick()
+    
+    const now = Date.now()
+    const timeSinceLastClick = now - lastClickTimeRef.current
+    
+    // Check for double tap
+    if (timeSinceLastClick < doubleTapDelay) {
+      // Double tap detected - go home
+      if (openApp) {
+        // Play double tap feedback
+        triggerHaptic('medium')
+        setTimeout(() => triggerHaptic('medium'), 50)
+        
+        setIsAnimating(true)
+        setTimeout(() => {
+          setOpenApp(null)
+          setIsAnimating(false)
+        }, 300)
+      }
+      lastClickTimeRef.current = 0 // Reset to prevent triple tap
+      setTimeout(() => setIsPressed(false), 100)
+      return
+    }
+    
+    lastClickTimeRef.current = now
     
     // If an app is open, the click should interact with the app content
     if (openApp) {
