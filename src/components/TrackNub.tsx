@@ -23,7 +23,6 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
   const dragStartRef = useRef({ x: 0, y: 0 })
   const lastDirectionRef = useRef({ x: 0, y: 0 })
   const tickIntervalRef = useRef<number | null>(null)
-  const audioContextRef = useRef<AudioContext | null>(null)
   const longPressTimerRef = useRef<number | null>(null)
   
   useEffect(() => {
@@ -32,31 +31,7 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
   }, [])
 
 
-  const initAudio = () => {
-    if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
-    }
-    return audioContextRef.current
-  }
 
-  const playTick = (distance: number) => {
-    const audioContext = initAudio()
-    const oscillator = audioContext.createOscillator()
-    const gainNode = audioContext.createGain()
-    
-    oscillator.connect(gainNode)
-    gainNode.connect(audioContext.destination)
-    
-    // Higher frequency for further distance
-    oscillator.frequency.value = 200 + (distance * 10)
-    oscillator.type = 'sine'
-    
-    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime)
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05)
-    
-    oscillator.start(audioContext.currentTime)
-    oscillator.stop(audioContext.currentTime + 0.05)
-  }
 
 
   const triggerHaptic = (style: 'light' | 'medium' | 'heavy' = 'light') => {
@@ -157,13 +132,13 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
   const startTicking = () => {
     if (tickIntervalRef.current) clearInterval(tickIntervalRef.current)
     
-    tickIntervalRef.current = window.setInterval(() => {
-      const distance = Math.sqrt(position.x * position.x + position.y * position.y)
-      if (distance > 5) {
-        // Tick rate based on distance - further = faster ticks
-        playTick(distance)
-      }
-    }, Math.max(100, 500 - (Math.sqrt(position.x * position.x + position.y * position.y) * 10)))
+    // Disabled tick sounds - they were causing unwanted audio playback
+    // tickIntervalRef.current = window.setInterval(() => {
+    //   const distance = Math.sqrt(position.x * position.x + position.y * position.y)
+    //   if (distance > 5) {
+    //     playTick(distance)
+    //   }
+    // }, Math.max(100, 500 - (Math.sqrt(position.x * position.x + position.y * position.y) * 10)))
   }
 
   const stopTicking = () => {
@@ -285,8 +260,8 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
   return (
     <div 
       className={`track-nub-container ${isDragging ? 'active' : ''} ${isPressed ? 'showing-zones' : ''} ${isLongPress ? 'long-press' : ''}`}
-      onMouseDown={handleMouseDown}
-      onClick={handleClick}
+      onMouseDown={'ontouchstart' in window ? undefined : handleMouseDown}
+      onClick={'ontouchstart' in window ? undefined : handleClick}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
