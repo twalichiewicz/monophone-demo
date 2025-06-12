@@ -24,6 +24,8 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
   const lastDirectionRef = useRef({ x: 0, y: 0 })
   const tickIntervalRef = useRef<number | null>(null)
   const longPressTimerRef = useRef<number | null>(null)
+  const pressTimeRef = useRef<number>(0)
+  const hasDraggedRef = useRef(false)
   
   useEffect(() => {
     // Initialize sound on component mount
@@ -46,6 +48,11 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
     const adjustedY = deltaY * SENSITIVITY
     
     const distance = Math.sqrt(adjustedX * adjustedX + adjustedY * adjustedY)
+    
+    // Mark as dragged if moved more than 5 pixels
+    if (distance > 5) {
+      hasDraggedRef.current = true
+    }
     
     let normalizedX = adjustedX / MAX_DISTANCE
     let normalizedY = adjustedY / MAX_DISTANCE
@@ -85,11 +92,19 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
   useEffect(() => {
     const handleMouseUp = () => {
       cancelLongPress()
+      
+      // Only play sound if it was a quick press-release without dragging
+      const pressDuration = Date.now() - pressTimeRef.current
+      if (pressDuration < 300 && !hasDraggedRef.current && pressTimeRef.current > 0) {
+        clickSoundManager.playClick()
+      }
+      
       setIsDragging(false)
       setPosition({ x: 0, y: 0 })
       setIsPressed(false)
       lastDirectionRef.current = { x: 0, y: 0 }
       stopTicking()
+      pressTimeRef.current = 0
     }
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -178,7 +193,10 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
     setIsDragging(true)
     setIsPressed(true)
     triggerHaptic('medium')
-    clickSoundManager.playClick()
+    
+    // Record press time and reset drag flag
+    pressTimeRef.current = Date.now()
+    hasDraggedRef.current = false
     
     const rect = nubRef.current!.getBoundingClientRect()
     centerRef.current = {
@@ -212,7 +230,10 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
     setIsDragging(true)
     setIsPressed(true)
     triggerHaptic('medium')
-    clickSoundManager.playClick()
+    
+    // Record press time and reset drag flag
+    pressTimeRef.current = Date.now()
+    hasDraggedRef.current = false
     
     // Use touch start position as center for more precise control
     centerRef.current = {
@@ -245,6 +266,13 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
 
   const handleTouchEnd = () => {
     cancelLongPress()
+    
+    // Only play sound if it was a quick press-release without dragging
+    const pressDuration = Date.now() - pressTimeRef.current
+    if (pressDuration < 300 && !hasDraggedRef.current && pressTimeRef.current > 0) {
+      clickSoundManager.playClick()
+    }
+    
     if (Math.abs(position.x) < 5 && Math.abs(position.y) < 5 && !isLongPress) {
       triggerHaptic('heavy')
       onClick()
@@ -254,7 +282,7 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
     setIsPressed(false)
     lastDirectionRef.current = { x: 0, y: 0 }
     stopTicking()
-    
+    pressTimeRef.current = 0
   }
 
   return (
