@@ -115,7 +115,7 @@ function App() {
     const timeSinceLastClick = now - lastClickTimeRef.current
     
     // Check for double tap
-    if (timeSinceLastClick < doubleTapDelay) {
+    if (timeSinceLastClick < doubleTapDelay && lastClickTimeRef.current > 0) {
       // Double tap detected - go home
       if (openApp) {
         // Play double tap feedback
@@ -133,13 +133,14 @@ function App() {
       return
     }
     
+    // Record this click time for potential double-tap
     lastClickTimeRef.current = now
     
-    // If an app is open, the click should interact with the app content
+    // Single tap behavior when app is open
     if (openApp) {
-      // Here we would handle app-specific actions
-      // For now, just provide haptic feedback
-      // The app UI components handle their own interactions
+      // Single taps in apps don't close the app
+      // They just provide haptic feedback for now
+      // App-specific actions could be added here
       setTimeout(() => setIsPressed(false), 100)
       return
     }
