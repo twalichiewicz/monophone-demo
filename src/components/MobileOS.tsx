@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import './MobileOS.css'
 import { ClockUI, MapsUI, PhotosUI, CameraUI, WeatherUI, NotesUI, MusicUI, MailUI, SettingsUI, MessagesUI } from './AppUIs'
 
@@ -7,7 +7,7 @@ interface MobileOSProps {
   isPressed: boolean
   openApp: string | null
   isAnimating: boolean
-  appSelectedIndex?: number
+  selectedElementId?: string | null
   onAppClick: (index: number) => void
   onCloseApp: () => void
 }
@@ -32,19 +32,7 @@ const dockApps = [
   { name: 'Music', icon: '🎵', color: '#e74c3c' },
 ]
 
-const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, isAnimating, appSelectedIndex: propAppSelectedIndex, onAppClick, onCloseApp }) => {
-  const [localAppSelectedIndex, setLocalAppSelectedIndex] = useState(0)
-  const appSelectedIndex = propAppSelectedIndex ?? localAppSelectedIndex
-  
-  useEffect(() => {
-    setLocalAppSelectedIndex(0)
-  }, [openApp])
-  
-  const handleAppNavigate = () => {
-    // This would be connected to the actual navigation
-    // For now, just cycle through indices
-    setLocalAppSelectedIndex(prev => (prev + 1) % 10)
-  }
+const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, isAnimating, onAppClick, onCloseApp }) => {
   
   const getAppNavItems = (appName: string) => {
     switch (appName) {
@@ -127,30 +115,30 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, 
     }
   }
   
-  const renderAppUI = (appIndex: number, selectedIdx: number, onNavigate: (direction: 'up' | 'down' | 'left' | 'right') => void) => {
+  const renderAppUI = (appIndex: number) => {
     const appName = apps[appIndex]?.name
     
     switch (appName) {
       case 'Clock':
-        return <ClockUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+        return <ClockUI appName={appName} />
       case 'Maps':
-        return <MapsUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+        return <MapsUI appName={appName} />
       case 'Photos':
-        return <PhotosUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+        return <PhotosUI appName={appName} />
       case 'Camera':
-        return <CameraUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+        return <CameraUI appName={appName} />
       case 'Weather':
-        return <WeatherUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+        return <WeatherUI appName={appName} />
       case 'Notes':
-        return <NotesUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+        return <NotesUI appName={appName} />
       case 'Music':
-        return <MusicUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+        return <MusicUI appName={appName} />
       case 'Mail':
-        return <MailUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+        return <MailUI appName={appName} />
       case 'Settings':
-        return <SettingsUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+        return <SettingsUI appName={appName} />
       case 'Messages':
-        return <MessagesUI appName={appName} selectedIndex={selectedIdx} onNavigate={onNavigate} />
+        return <MessagesUI appName={appName} />
       default:
         return (
           <>
@@ -216,7 +204,12 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, 
         } as React.CSSProperties}>
           <div className="app-header">
             <div className="app-close-bar">
-              <button className="app-close-button" onClick={onCloseApp} tabIndex={0}>
+              <button 
+                id="app-close-button"
+                className="app-close-button" 
+                onClick={onCloseApp} 
+                data-selectable="true"
+              >
                 <span className="close-icon">✕</span>
                 <span className="close-text">Close</span>
               </button>
@@ -224,11 +217,16 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, 
             <div className="app-title">{apps[parseInt(openApp.split('-')[1])]?.name}</div>
           </div>
           <div className="app-content">
-            {renderAppUI(parseInt(openApp.split('-')[1]), appSelectedIndex, handleAppNavigate)}
+            {renderAppUI(parseInt(openApp.split('-')[1]))}
           </div>
           <div className="app-nav-bar">
             {getAppNavItems(apps[parseInt(openApp.split('-')[1])]?.name).map((item, index) => (
-              <div key={index} className="nav-item" tabIndex={0}>
+              <div 
+                key={index} 
+                id={`nav-item-${index}`}
+                className="nav-item" 
+                data-selectable="true"
+              >
                 <span className="nav-icon">{item.icon}</span>
                 <span className="nav-label">{item.label}</span>
               </div>

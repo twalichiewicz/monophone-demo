@@ -3,11 +3,9 @@ import './AppUIs.css'
 
 interface AppUIProps {
   appName: string
-  selectedIndex: number
-  onNavigate: (direction: 'up' | 'down' | 'left' | 'right') => void
 }
 
-export const ClockUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
+export const ClockUI: React.FC<AppUIProps> = () => {
   const now = new Date()
   const hours = now.getHours().toString().padStart(2, '0')
   const minutes = now.getMinutes().toString().padStart(2, '0')
@@ -27,7 +25,9 @@ export const ClockUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
         {buttons.map((button, i) => (
           <div 
             key={i} 
-            className={`clock-button ${i === selectedIndex ? 'selected' : ''}`}
+            id={`clock-${button.toLowerCase()}`}
+            data-selectable="true"
+            className="clock-button"
             tabIndex={0}
           >
             {button}
@@ -38,9 +38,8 @@ export const ClockUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
   )
 }
 
-export const MapsUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
+export const MapsUI: React.FC<AppUIProps> = () => {
   const locations = ['Current Location', 'Home', 'Work', 'Saved Places']
-  const mapIndex = selectedIndex % locations.length
   
   return (
     <div className="maps-ui">
@@ -55,13 +54,21 @@ export const MapsUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
         </div>
       </div>
       <div className="map-search">
-        <input type="text" placeholder="Search for a place..." className="map-search-input" />
+        <input 
+          id="maps-search"
+          data-selectable="true"
+          type="text" 
+          placeholder="Search for a place..." 
+          className="map-search-input" 
+        />
       </div>
       <div className="map-quick-actions">
         {locations.map((loc, i) => (
           <div 
             key={i} 
-            className={`map-action ${i === mapIndex ? 'selected' : ''}`}
+            id={`maps-${loc.toLowerCase().replace(/\s+/g, '-')}`}
+            data-selectable="true"
+            className="map-action"
             tabIndex={0}
           >
             {loc}
@@ -72,9 +79,8 @@ export const MapsUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
   )
 }
 
-export const PhotosUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
+export const PhotosUI: React.FC<AppUIProps> = () => {
   const photos = Array(12).fill(null)
-  const photoIndex = selectedIndex % photos.length
   
   return (
     <div className="photos-ui">
@@ -86,11 +92,13 @@ export const PhotosUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
         {photos.map((_, i) => (
           <div 
             key={i} 
-            className={`photo-item ${i === photoIndex ? 'selected' : ''}`}
+            id={`photo-${i}`}
+            data-selectable="true"
+            className="photo-item"
             tabIndex={0}
           >
             <div className="photo-placeholder">
-              {i === photoIndex ? '🖼️' : ''}
+              🖼️
             </div>
           </div>
         ))}
@@ -99,9 +107,8 @@ export const PhotosUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
   )
 }
 
-export const CameraUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
+export const CameraUI: React.FC<AppUIProps> = () => {
   const modes = ['Photo', 'Video', 'Portrait', 'Pano']
-  const modeIndex = selectedIndex % modes.length
   
   return (
     <div className="camera-ui">
@@ -119,7 +126,9 @@ export const CameraUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
           {modes.map((mode, i) => (
             <div 
               key={i} 
-              className={`camera-mode ${i === modeIndex ? 'selected' : ''}`}
+              id={`camera-mode-${mode.toLowerCase()}`}
+              data-selectable="true"
+              className="camera-mode"
               tabIndex={0}
             >
               {mode}
@@ -127,14 +136,18 @@ export const CameraUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
           ))}
         </div>
         <div className="camera-shutter">
-          <div className="shutter-button" />
+          <div 
+            id="camera-shutter"
+            data-selectable="true"
+            className="shutter-button" 
+          />
         </div>
       </div>
     </div>
   )
 }
 
-export const WeatherUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
+export const WeatherUI: React.FC<AppUIProps> = () => {
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
   
   return (
@@ -163,7 +176,9 @@ export const WeatherUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
         {days.map((day, i) => (
           <div 
             key={i} 
-            className={`forecast-day ${i === selectedIndex ? 'selected' : ''}`}
+            id={`weather-day-${day.toLowerCase()}`}
+            data-selectable="true"
+            className="forecast-day"
             tabIndex={0}
           >
             <div className="forecast-day-name">{day}</div>
@@ -176,14 +191,13 @@ export const WeatherUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
   )
 }
 
-export const NotesUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
+export const NotesUI: React.FC<AppUIProps> = () => {
   const notes = [
     { title: 'Meeting Notes', preview: 'Discuss Q4 goals...' },
     { title: 'Shopping List', preview: 'Milk, eggs, bread...' },
     { title: 'Ideas', preview: 'App concept for...' },
     { title: 'Todo', preview: 'Call dentist...' }
   ]
-  const noteIndex = selectedIndex % notes.length
   
   return (
     <div className="notes-ui">
@@ -191,7 +205,9 @@ export const NotesUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
         {notes.map((note, i) => (
           <div 
             key={i} 
-            className={`note-item ${i === noteIndex ? 'selected' : ''}`}
+            id={`note-${i}`}
+            data-selectable="true"
+            className="note-item"
             tabIndex={0}
           >
             <div className="note-title">{note.title}</div>
@@ -202,14 +218,15 @@ export const NotesUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
       </div>
       <div className="note-editor">
         <div className="editor-toolbar">
-          <button className="toolbar-btn selected">B</button>
-          <button className="toolbar-btn">I</button>
-          <button className="toolbar-btn">U</button>
+          <button id="notes-bold" data-selectable="true" className="toolbar-btn">B</button>
+          <button id="notes-italic" data-selectable="true" className="toolbar-btn">I</button>
+          <button id="notes-underline" data-selectable="true" className="toolbar-btn">U</button>
         </div>
         <textarea 
+          id="notes-editor"
+          data-selectable="true"
           className="editor-content" 
           placeholder="Start typing..."
-          value={notes[noteIndex].title + '\n\n' + notes[noteIndex].preview}
           readOnly
         />
       </div>
@@ -217,9 +234,7 @@ export const NotesUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
   )
 }
 
-export const MusicUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
-  const controls = ['Previous', 'Play/Pause', 'Next']
-  const controlIndex = selectedIndex % controls.length
+export const MusicUI: React.FC<AppUIProps> = () => {
   
   return (
     <div className="music-ui">
@@ -240,22 +255,21 @@ export const MusicUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
         </div>
       </div>
       <div className="playback-controls">
-        <button className={`control-btn ${controlIndex === 0 ? 'selected' : ''}`}>⏮</button>
-        <button className={`control-btn play ${controlIndex === 1 ? 'selected' : ''}`}>▶️</button>
-        <button className={`control-btn ${controlIndex === 2 ? 'selected' : ''}`}>⏭</button>
+        <button id="music-previous" data-selectable="true" className="control-btn">⏮</button>
+        <button id="music-play" data-selectable="true" className="control-btn play">▶️</button>
+        <button id="music-next" data-selectable="true" className="control-btn">⏭</button>
       </div>
     </div>
   )
 }
 
-export const MailUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
+export const MailUI: React.FC<AppUIProps> = () => {
   const emails = [
     { from: 'Team', subject: 'Project Update', preview: 'The latest updates on...' },
     { from: 'Newsletter', subject: 'Weekly Digest', preview: 'This week in tech...' },
     { from: 'John Doe', subject: 'Meeting Tomorrow', preview: 'Confirming our meeting...' },
     { from: 'Support', subject: 'Ticket Resolved', preview: 'Your issue has been...' }
   ]
-  const emailIndex = selectedIndex % emails.length
   
   return (
     <div className="mail-ui">
@@ -267,7 +281,9 @@ export const MailUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
         {emails.map((email, i) => (
           <div 
             key={i} 
-            className={`mail-item ${i === emailIndex ? 'selected' : ''}`}
+            id={`mail-${i}`}
+            data-selectable="true"
+            className="mail-item"
             tabIndex={0}
           >
             <div className="mail-from">{email.from}</div>
@@ -281,7 +297,7 @@ export const MailUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
   )
 }
 
-export const SettingsUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
+export const SettingsUI: React.FC<AppUIProps> = () => {
   const settings = [
     { icon: '🔔', title: 'Notifications', value: 'On' },
     { icon: '🔊', title: 'Sound & Haptics', value: '80%' },
@@ -290,7 +306,6 @@ export const SettingsUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
     { icon: '📱', title: 'General', value: '' },
     { icon: '♿', title: 'Accessibility', value: '' }
   ]
-  const settingIndex = selectedIndex % settings.length
   
   return (
     <div className="settings-ui">
@@ -301,7 +316,9 @@ export const SettingsUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
         {settings.map((setting, i) => (
           <div 
             key={i} 
-            className={`setting-item ${i === settingIndex ? 'selected' : ''}`}
+            id={`settings-${setting.title.toLowerCase().replace(/[&\s]+/g, '-')}`}
+            data-selectable="true"
+            className="setting-item"
             tabIndex={0}
           >
             <span className="setting-icon">{setting.icon}</span>
@@ -315,26 +332,27 @@ export const SettingsUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
   )
 }
 
-export const MessagesUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
+export const MessagesUI: React.FC<AppUIProps> = () => {
   const conversations = [
     { name: 'Mom', message: 'How are you doing?', time: '2m' },
     { name: 'Work Group', message: 'Meeting at 3pm', time: '1h' },
     { name: 'Jane', message: 'Thanks!', time: '3h' },
     { name: 'Delivery', message: 'Your package has arrived', time: '5h' }
   ]
-  const convoIndex = selectedIndex % conversations.length
   
   return (
     <div className="messages-ui">
       <div className="messages-header">
         <h3>Messages</h3>
-        <button className="compose-btn">✏️</button>
+        <button id="messages-compose" data-selectable="true" className="compose-btn">✏️</button>
       </div>
       <div className="conversations-list">
         {conversations.map((convo, i) => (
           <div 
             key={i} 
-            className={`conversation-item ${i === convoIndex ? 'selected' : ''}`}
+            id={`message-${i}`}
+            data-selectable="true"
+            className="conversation-item"
             tabIndex={0}
           >
             <div className="convo-avatar">{convo.name[0]}</div>
@@ -347,8 +365,14 @@ export const MessagesUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
         ))}
       </div>
       <div className="message-input-area">
-        <input type="text" placeholder="Type a message..." className="message-input" />
-        <button className="send-btn">→</button>
+        <input 
+          id="messages-input"
+          data-selectable="true"
+          type="text" 
+          placeholder="Type a message..." 
+          className="message-input" 
+        />
+        <button id="messages-send" data-selectable="true" className="send-btn">→</button>
       </div>
     </div>
   )

@@ -15,12 +15,9 @@ function App() {
   const [openApp, setOpenApp] = useState<string | null>(null)
   const [isAnimating, setIsAnimating] = useState(false)
   const [showSpatialView, setShowSpatialView] = useState(false)
-  const [appSelectedIndex, setAppSelectedIndex] = useState(0)
+  const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
   const lastNavTimeRef = useRef(0)
   const navCooldown = 200 // ms between navigation
-  const tapCountRef = useRef(0)
-  const tapTimerRef = useRef<number | null>(null)
-  const doubleTapDelay = 300 // ms for double tap detection
 
   const handleDirectionInput = (direction: { x: number; y: number }) => {
     // Handle omnidirectional navigation with cooldown
@@ -110,153 +107,58 @@ function App() {
     triggerHaptic('heavy')
     clickSoundManager.playClick()
     
-    // CASE 1: On springboard - single tap opens app immediately
     if (!openApp) {
+      // On springboard - open app
       if (selectedIndex === 10) {
-        // Flip app
         setIsFlipped(!isFlipped)
         document.querySelector('.app')?.classList.toggle('flipped')
       } else if (!isAnimating) {
-        // Open selected app
         setIsAnimating(true)
-        setAppSelectedIndex(0)
         setTimeout(() => {
           setOpenApp(`app-${selectedIndex}`)
           setIsAnimating(false)
-          // Select the first focusable element in the app
-          setTimeout(() => {
-            // Clear ALL selections first
-            document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'))
-            
-            // Find and select the close button in the new app
-            const appScreen = document.querySelector('.app-screen')
-            if (appScreen) {
-              const closeButton = appScreen.querySelector('.app-close-button') as HTMLElement
-              if (closeButton) {
-                closeButton.classList.add('selected')
-                setAppSelectedIndex(0) // Reset index
-              }
-            }
-          }, 100)
+          // Initialize first element as selected
+          setSelectedElementId('app-close-button')
         }, 300)
       }
-      setTimeout(() => setIsPressed(false), 100)
-      return
-    }
-    
-    // CASE 2: In app - handle taps
-    tapCountRef.current += 1
-    
-    if (tapTimerRef.current) {
-      clearTimeout(tapTimerRef.current)
-    }
-    
-    tapTimerRef.current = window.setTimeout(() => {
-      const taps = tapCountRef.current
-      tapCountRef.current = 0
-      
-      console.log(`Processing ${taps} tap(s) in app`)
-      
-      if (taps >= 2) {
-        // Double tap (or more) - always go home
-        console.log('Double tap detected - going home')
-        triggerHaptic('medium')
-        setTimeout(() => triggerHaptic('medium'), 50)
-        
-        setIsAnimating(true)
-        setTimeout(() => {
-          setOpenApp(null)
-          setIsAnimating(false)
-          // Clear all selections when going home
-          document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'))
-        }, 300)
-      } else if (taps === 1) {
-        // Single tap - activate selected element ONLY
-        const appScreen = document.querySelector('.app-screen')
-        if (!appScreen) {
-          console.warn('No app screen found')
-          return
-        }
-        
-        const selectedElement = appScreen.querySelector('.selected') as HTMLElement
-        
-        if (!selectedElement) {
-          console.warn('No element selected within app screen')
-          return
-        }
-        
-        // Ensure the selected element is actually within the current app
-        if (!appScreen.contains(selectedElement)) {
-          console.warn('Selected element is not within current app screen')
-          return
-        }
-        
-        console.log('Selected element:', selectedElement.className, selectedElement.textContent)
-        
-        // Check if it's the close button
-        if (selectedElement.classList.contains('app-close-button')) {
-          console.log('Close button selected - closing app')
-          // Close app
-          handleCloseApp()
-        } else {
-          console.log('Activating element:', selectedElement)
-          // Activate the element (click it)
-          const clickEvent = new MouseEvent('click', {
-            bubbles: true,
-            cancelable: true,
-            view: window
-          })
-          selectedElement.dispatchEvent(clickEvent)
+    } else {
+      // In app - activate selected element
+      if (selectedElementId === 'app-close-button') {
+        handleCloseApp()
+      } else if (selectedElementId) {
+        const element = document.getElementById(selectedElementId)
+        if (element) {
+          element.click()
         }
       }
-    }, doubleTapDelay)
+    }
     
     setTimeout(() => setIsPressed(false), 100)
   }
   
   const handleAppDirectClick = (index: number) => {
-    // Direct touch/click on an app
     triggerHaptic('medium')
     clickSoundManager.playClick()
     
-    // Update selected index to match clicked app
     setSelectedIndex(index)
     
-    // Check if flip app was clicked (Flip is now at index 10)
     if (index === 10 && !openApp) {
       setIsFlipped(!isFlipped)
       document.querySelector('.app')?.classList.toggle('flipped')
       return
     }
     
-    // Open app animation
     if (!openApp && !isAnimating) {
       setIsAnimating(true)
-      setAppSelectedIndex(0) // Reset app navigation when opening new app
       setTimeout(() => {
         setOpenApp(`app-${index}`)
         setIsAnimating(false)
-        // Select the first focusable element in the app
-        setTimeout(() => {
-          // Clear ALL selections first
-          document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'))
-          
-          // Find and select the close button in the new app
-          const appScreen = document.querySelector('.app-screen')
-          if (appScreen) {
-            const closeButton = appScreen.querySelector('.app-close-button') as HTMLElement
-            if (closeButton) {
-              closeButton.classList.add('selected')
-              setAppSelectedIndex(0) // Reset index
-            }
-          }
-        }, 100)
+        setSelectedElementId('app-close-button')
       }, 300)
     }
   }
   
   const handleCloseApp = () => {
-    // Direct touch/click on close button
     triggerHaptic('light')
     clickSoundManager.playClick()
     
@@ -265,130 +167,104 @@ function App() {
       setTimeout(() => {
         setOpenApp(null)
         setIsAnimating(false)
-        // Clear all selections when closing app
-        document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'))
+        setSelectedElementId(null)
       }, 300)
     }
   }
   
   const handleAppNavigation = (direction: 'up' | 'down' | 'left' | 'right') => {
-    // Get all focusable elements in the current app
+    if (!openApp) return
+    
     const appScreen = document.querySelector('.app-screen')
     if (!appScreen) return
     
-    // Define selectors for focusable elements
-    const focusableSelectors = [
-      'button:not([disabled])',
-      'input:not([disabled])',
-      'textarea:not([disabled])',
-      'select:not([disabled])',
-      '[tabindex]:not([tabindex="-1"])',
-      '.note-item',
-      '.mail-item',
-      '.conversation-item',
-      '.setting-item',
-      '.photo-item',
-      '.forecast-day',
-      '.map-action',
-      '.clock-button',
-      '.camera-mode',
-      '.control-btn',
-      '.nav-item',
-      '.app-close-button'
-    ].join(', ')
+    // Get all elements with data-selectable attribute
+    const selectableElements = Array.from(
+      appScreen.querySelectorAll('[data-selectable]')
+    ) as HTMLElement[]
     
-    // Get all focusable elements from the entire app screen
-    const allFocusable = Array.from(appScreen.querySelectorAll(focusableSelectors))
+    if (selectableElements.length === 0) return
     
-    if (allFocusable.length === 0) return
+    // Find current selected element
+    const currentElement = selectedElementId 
+      ? selectableElements.find(el => el.id === selectedElementId)
+      : null
     
-    // Clear all existing selections first
-    document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'))
+    const currentIndex = currentElement 
+      ? selectableElements.indexOf(currentElement)
+      : -1
     
-    // Find currently selected element
-    let currentIndex = appSelectedIndex
-    if (currentIndex < 0 || currentIndex >= allFocusable.length) {
-      currentIndex = 0
-    }
-    
-    // Calculate positions of all elements
-    const elementPositions = allFocusable.map(el => {
+    // Get element positions
+    const positions = selectableElements.map(el => {
       const rect = el.getBoundingClientRect()
       return {
         element: el,
         x: rect.left + rect.width / 2,
         y: rect.top + rect.height / 2,
-        top: rect.top,
-        bottom: rect.bottom,
         left: rect.left,
-        right: rect.right
+        right: rect.right,
+        top: rect.top,
+        bottom: rect.bottom
       }
     })
     
-    const currentPos = elementPositions[currentIndex]
-    let nextIndex = currentIndex
+    let nextElement: HTMLElement | null = null
     
-    if (currentPos) {
-      // Find the best next element based on direction
-      const candidates = elementPositions.filter((pos, idx) => {
+    if (currentIndex >= 0) {
+      const current = positions[currentIndex]
+      
+      // Find best candidate in direction
+      const candidates = positions.filter((pos, idx) => {
         if (idx === currentIndex) return false
         
         switch (direction) {
           case 'up':
-            return pos.y < currentPos.y - 10
+            return pos.y < current.y - 5
           case 'down':
-            return pos.y > currentPos.y + 10
+            return pos.y > current.y + 5
           case 'left':
-            return pos.x < currentPos.x - 10
+            return pos.x < current.x - 5
           case 'right':
-            return pos.x > currentPos.x + 10
+            return pos.x > current.x + 5
           default:
             return false
         }
       })
       
       if (candidates.length > 0) {
-        // Find the closest element in the given direction
+        // Find closest in the direction
         const closest = candidates.reduce((best, pos) => {
-          const distance = Math.sqrt(
-            Math.pow(pos.x - currentPos.x, 2) + 
-            Math.pow(pos.y - currentPos.y, 2)
+          const dist = Math.sqrt(
+            Math.pow(pos.x - current.x, 2) + 
+            Math.pow(pos.y - current.y, 2)
           )
-          const bestDistance = Math.sqrt(
-            Math.pow(best.x - currentPos.x, 2) + 
-            Math.pow(best.y - currentPos.y, 2)
+          const bestDist = Math.sqrt(
+            Math.pow(best.x - current.x, 2) + 
+            Math.pow(best.y - current.y, 2)
           )
-          return distance < bestDistance ? pos : best
+          return dist < bestDist ? pos : best
         })
         
-        nextIndex = elementPositions.indexOf(closest)
+        nextElement = closest.element
       }
+    } else {
+      // No selection, select first element
+      nextElement = selectableElements[0]
     }
     
-    // Update selection
-    if (nextIndex >= 0 && nextIndex < allFocusable.length) {
-      // Clear all selections
-      document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'))
+    if (nextElement) {
+      setSelectedElementId(nextElement.id)
       
-      // Add selected class to next element
-      const nextElement = allFocusable[nextIndex]
-      nextElement.classList.add('selected')
-      
-      // Update the app selected index
-      setAppSelectedIndex(nextIndex)
-      
-      // Scroll element into view if needed
-      const container = document.querySelector('.app-content')
+      // Scroll into view if needed
+      const container = appScreen.querySelector('.app-content')
       if (container) {
         const rect = nextElement.getBoundingClientRect()
         const containerRect = container.getBoundingClientRect()
         
-        // Check if element is outside visible area
         if (rect.top < containerRect.top || rect.bottom > containerRect.bottom - 90) {
           nextElement.scrollIntoView({ 
             behavior: 'smooth', 
-            block: 'center',
-            inline: 'center'
+            block: 'center'
           })
         }
       }
@@ -417,12 +293,24 @@ function App() {
     return () => {
       document.removeEventListener('touchmove', preventScroll)
       window.removeEventListener('resize', checkMobile)
-      // Clear tap timer on unmount
-      if (tapTimerRef.current) {
-        clearTimeout(tapTimerRef.current)
-      }
     }
   }, [])
+
+  // Handle selection state
+  useEffect(() => {
+    if (!openApp || !selectedElementId) return
+    
+    // Clear all selections
+    document.querySelectorAll('.selected').forEach(el => {
+      el.classList.remove('selected')
+    })
+    
+    // Add selection to current element
+    const element = document.getElementById(selectedElementId)
+    if (element) {
+      element.classList.add('selected')
+    }
+  }, [selectedElementId, openApp])
 
   if (!isMobile) {
     return <DesktopModal />
@@ -436,7 +324,7 @@ function App() {
           isPressed={isPressed} 
           openApp={openApp}
           isAnimating={isAnimating}
-          appSelectedIndex={appSelectedIndex}
+          selectedElementId={selectedElementId}
           onAppClick={handleAppDirectClick}
           onCloseApp={handleCloseApp}
         />
