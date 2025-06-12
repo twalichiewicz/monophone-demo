@@ -8,16 +8,52 @@
   padding-top: 40px;
 }
 
-/* Cursor glow animation */
+/* Cursor animations */
 @keyframes cursorPulse {
   0%, 100% {
-    opacity: 1;
     filter: brightness(1);
   }
   50% {
-    opacity: 0.8;
     filter: brightness(1.2);
   }
+}
+
+@keyframes cursorFadeIn {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes cursorFadeOut {
+  from {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+}
+
+.floating-cursor {
+  transition: left 0.08s ease-out, top 0.08s ease-out;
+}
+
+.floating-cursor.visible {
+  animation: cursorFadeIn 0.3s ease-out forwards, cursorPulse 2s ease-in-out infinite 0.3s;
+}
+
+.floating-cursor.hidden {
+  animation: cursorFadeOut 0.4s ease-out forwards;
 }
 
 .status-bar {

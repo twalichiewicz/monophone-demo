@@ -199,9 +199,9 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, 
       </div>
       
       {/* Floating cursor */}
-      {cursorPosition && cursorVisible && (
+      {cursorPosition && (
         <div 
-          className="floating-cursor"
+          className={`floating-cursor ${cursorVisible ? 'visible' : 'hidden'}`}
           style={{
             position: 'absolute',
             left: `${cursorPosition.x}%`,
@@ -214,15 +214,13 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, 
             transform: 'translate(-50%, -50%)',
             pointerEvents: 'none',
             zIndex: 9999,
-            transition: 'all 0.08s ease-out',
             boxShadow: `
               0 0 20px rgba(0, 122, 255, 0.6),
               0 0 40px rgba(0, 122, 255, 0.4),
               0 0 60px rgba(0, 122, 255, 0.2),
               inset 0 0 10px rgba(255, 255, 255, 0.5),
               0 2px 4px rgba(0, 0, 0, 0.3)
-            `,
-            animation: 'cursorPulse 2s ease-in-out infinite'
+            `
           }}
         />
       )}

@@ -34,12 +34,12 @@ function App() {
         clearTimeout(cursorTimeoutRef.current)
       }
       
-      // Set new timeout to hide cursor after 3 seconds of inactivity
+      // Set new timeout to hide cursor after 1.5 seconds of inactivity
       cursorTimeoutRef.current = window.setTimeout(() => {
         setCursorVisible(false)
         setCursorPosition({ x: 50, y: 50 }) // Reset to center
         setHoveredIndex(null)
-      }, 3000)
+      }, 1500)
       setCursorPosition(prev => {
         // Get trackpad center position (assuming it's at bottom center of screen)
         const trackpadCenterX = 50; // percentage

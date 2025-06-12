@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import './TrackNub.css'
 import { clickSoundManager } from '../utils/audioUtils'
 
@@ -9,289 +9,307 @@ interface TrackNubProps {
   onLongPress?: () => void
 }
 
-const SENSITIVITY = 0.3 // Lower = more precise control
-const MAX_DISTANCE = 25 // Maximum drag distance
+// Navigation modes
+type NavMode = 'idle' | 'swipe' | 'cursor' | 'longpress'
 
-const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPress }) => {
-  const [isDragging, setIsDragging] = useState(false)
-  const [position, setPosition] = useState({ x: 0, y: 0 })
+const NavModes = {
+  IDLE: 'idle' as NavMode,
+  SWIPE: 'swipe' as NavMode,
+  CURSOR: 'cursor' as NavMode,
+  LONG_PRESS: 'longpress' as NavMode
+}
+
+// Gesture thresholds
+const SWIPE_THRESHOLD = 15 // pixels to trigger swipe
+const HOLD_DURATION = 150 // ms to enter cursor mode
+const LONG_PRESS_DURATION = 3000 // ms for long press
+const VISUAL_MAX_DISTANCE = 25 // max visual displacement
+const CURSOR_SENSITIVITY = 0.5 // cursor movement sensitivity
+
+const TrackNub: React.FC<TrackNubProps> = ({ 
+  onDirectionInput, 
+  onClick, 
+  onLongPress 
+}) => {
+  // State
+  const [mode, setMode] = useState<NavMode>(NavModes.IDLE)
+  const [visualPosition, setVisualPosition] = useState({ x: 0, y: 0 })
   const [isPressed, setIsPressed] = useState(false)
-  const [isLongPress, setIsLongPress] = useState(false)
-  const nubRef = useRef<HTMLDivElement>(null)
-  const centerRef = useRef({ x: 0, y: 0 })
-  const dragStartRef = useRef({ x: 0, y: 0 })
-  const lastDirectionRef = useRef({ x: 0, y: 0 })
-  const tickIntervalRef = useRef<number | null>(null)
-  const longPressTimerRef = useRef<number | null>(null)
-  const pressTimeRef = useRef<number>(0)
-  const hasDraggedRef = useRef(false)
   
-  useEffect(() => {
-    // Initialize sound on component mount
-    clickSoundManager.init()
-    
-    // Also initialize on first user interaction for mobile browsers
-    const initOnInteraction = () => {
-      clickSoundManager.init()
-      document.removeEventListener('touchstart', initOnInteraction)
-      document.removeEventListener('mousedown', initOnInteraction)
-    }
-    
-    document.addEventListener('touchstart', initOnInteraction, { passive: true })
-    document.addEventListener('mousedown', initOnInteraction, { passive: true })
-    
-    return () => {
-      document.removeEventListener('touchstart', initOnInteraction)
-      document.removeEventListener('mousedown', initOnInteraction)
-    }
-  }, [])
+  // Refs for gesture tracking
+  const touchStartRef = useRef({ x: 0, y: 0, time: 0 })
+  const currentTouchRef = useRef({ x: 0, y: 0 })
+  const hasMovedRef = useRef(false)
+  const hasFiredSwipeRef = useRef(false)
+  
+  // Timer refs
+  const holdTimerRef = useRef<number | undefined>(undefined)
+  const longPressTimerRef = useRef<number | undefined>(undefined)
+  
+  // Container ref
+  const nubRef = useRef<HTMLDivElement>(null)
 
-
-
-
-
-  const triggerHaptic = (style: 'light' | 'medium' | 'heavy' = 'light') => {
+  // Haptic feedback
+  const triggerHaptic = useCallback((style: 'light' | 'medium' | 'heavy' = 'medium') => {
     if ('vibrate' in navigator) {
       const duration = style === 'light' ? 10 : style === 'medium' ? 20 : 30
       navigator.vibrate(duration)
     }
-  }
+  }, [])
 
-  const processInput = (deltaX: number, deltaY: number) => {
-    const adjustedX = deltaX * SENSITIVITY
-    const adjustedY = deltaY * SENSITIVITY
-    
-    const distance = Math.sqrt(adjustedX * adjustedX + adjustedY * adjustedY)
-    
-    // Mark as dragged if moved more than 5 pixels
-    if (distance > 5) {
-      hasDraggedRef.current = true
+  // Calculate movement delta
+  const getDelta = useCallback(() => {
+    return {
+      x: currentTouchRef.current.x - touchStartRef.current.x,
+      y: currentTouchRef.current.y - touchStartRef.current.y
     }
-    
-    // Send raw delta for trackpad mode
-    onDirectionInput({ x: deltaX, y: deltaY }, true)
-    
-    // Also update visual position for the nub
-    let normalizedX = adjustedX / MAX_DISTANCE
-    let normalizedY = adjustedY / MAX_DISTANCE
-    
-    if (distance > MAX_DISTANCE) {
-      normalizedX = (adjustedX / distance) * MAX_DISTANCE / MAX_DISTANCE
-      normalizedY = (adjustedY / distance) * MAX_DISTANCE / MAX_DISTANCE
-    }
-    
-    setPosition({
-      x: normalizedX * MAX_DISTANCE,
-      y: normalizedY * MAX_DISTANCE
-    })
-    
-    // Trigger haptics on significant movement
-    if (distance > 10) {
-      triggerHaptic('light')
-    }
-  }
+  }, [])
 
-  useEffect(() => {
-    const handleMouseUp = () => {
-      cancelLongPress()
+  // Calculate distance from start
+  const getDistance = useCallback(() => {
+    const delta = getDelta()
+    return Math.sqrt(delta.x * delta.x + delta.y * delta.y)
+  }, [getDelta])
+
+  // Update visual position
+  const updateVisualPosition = useCallback((deltaX: number, deltaY: number) => {
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+    let visualX = deltaX
+    let visualY = deltaY
+    
+    // Clamp to max distance
+    if (distance > VISUAL_MAX_DISTANCE) {
+      const scale = VISUAL_MAX_DISTANCE / distance
+      visualX *= scale
+      visualY *= scale
+    }
+    
+    setVisualPosition({ x: visualX, y: visualY })
+  }, [])
+
+  // Handle swipe detection
+  const checkSwipe = useCallback(() => {
+    if (mode !== NavModes.IDLE || hasFiredSwipeRef.current) return
+    
+    const delta = getDelta()
+    const distance = getDistance()
+    
+    if (distance >= SWIPE_THRESHOLD) {
+      // Calculate swipe direction
+      const angle = Math.atan2(delta.y, delta.x)
+      let dirX = 0
+      let dirY = 0
       
-      // Only play sound if it was a quick press-release without dragging
-      const pressDuration = Date.now() - pressTimeRef.current
-      if (pressDuration < 500 && !hasDraggedRef.current && pressTimeRef.current > 0) {
-        clickSoundManager.playClick()
+      if (angle >= -Math.PI/4 && angle < Math.PI/4) {
+        dirX = 1 // Right
+      } else if (angle >= Math.PI/4 && angle < 3*Math.PI/4) {
+        dirY = 1 // Down  
+      } else if (angle >= -3*Math.PI/4 && angle < -Math.PI/4) {
+        dirY = -1 // Up
+      } else {
+        dirX = -1 // Left
       }
       
-      setIsDragging(false)
-      setPosition({ x: 0, y: 0 })
-      setIsPressed(false)
-      lastDirectionRef.current = { x: 0, y: 0 }
-      stopTicking()
-      pressTimeRef.current = 0
-    }
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging || !nubRef.current) return
-
-      const rect = nubRef.current.getBoundingClientRect()
-      const centerX = rect.left + rect.width / 2
-      const centerY = rect.top + rect.height / 2
+      // Fire swipe event
+      onDirectionInput({ x: dirX, y: dirY }, false)
+      setMode(NavModes.SWIPE)
+      hasFiredSwipeRef.current = true
+      triggerHaptic('medium')
       
-      const deltaX = e.clientX - centerX
-      const deltaY = e.clientY - centerY
-      
-      // Cancel long press if moved too much
-      if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
-        cancelLongPress()
+      // Cancel hold timer
+      if (holdTimerRef.current !== undefined) {
+        clearTimeout(holdTimerRef.current)
+        holdTimerRef.current = undefined
       }
-      
-      processInput(deltaX, deltaY)
     }
+  }, [mode, getDelta, getDistance, onDirectionInput, triggerHaptic])
 
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove)
-      window.addEventListener('mouseup', handleMouseUp)
-    }
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mouseup', handleMouseUp)
-    }
-  }, [isDragging, onDirectionInput])
-
-  // Update ticking rate based on position
-  useEffect(() => {
-    if (isDragging && tickIntervalRef.current) {
-      stopTicking()
-      startTicking()
-    }
-  }, [position.x, position.y, isDragging])
-
-  const startTicking = () => {
-    if (tickIntervalRef.current) clearInterval(tickIntervalRef.current)
+  // Handle cursor mode
+  const updateCursor = useCallback(() => {
+    if (mode !== NavModes.CURSOR) return
     
-    // Disabled tick sounds - they were causing unwanted audio playback
-    // tickIntervalRef.current = window.setInterval(() => {
-    //   const distance = Math.sqrt(position.x * position.x + position.y * position.y)
-    //   if (distance > 5) {
-    //     playTick(distance)
-    //   }
-    // }, Math.max(100, 500 - (Math.sqrt(position.x * position.x + position.y * position.y) * 10)))
-  }
+    const delta = getDelta()
+    onDirectionInput({ 
+      x: delta.x * CURSOR_SENSITIVITY, 
+      y: delta.y * CURSOR_SENSITIVITY 
+    }, true)
+  }, [mode, getDelta, onDirectionInput])
 
-  const stopTicking = () => {
-    if (tickIntervalRef.current) {
-      clearInterval(tickIntervalRef.current)
-      tickIntervalRef.current = null
+  // Start hold timer
+  const startHoldTimer = useCallback(() => {
+    if (holdTimerRef.current !== undefined) {
+      clearTimeout(holdTimerRef.current)
     }
-  }
+    
+    holdTimerRef.current = window.setTimeout(() => {
+      if (mode === NavModes.IDLE && !hasFiredSwipeRef.current) {
+        setMode(NavModes.CURSOR)
+        triggerHaptic('light')
+        // Send initial cursor position to show cursor
+        onDirectionInput({ x: 0, y: 0 }, true)
+      }
+    }, HOLD_DURATION)
+  }, [mode, triggerHaptic, onDirectionInput])
 
-  const startLongPressTimer = () => {
-    if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current)
+  // Start long press timer
+  const startLongPressTimer = useCallback(() => {
+    if (longPressTimerRef.current !== undefined) {
+      clearTimeout(longPressTimerRef.current)
+    }
     
     longPressTimerRef.current = window.setTimeout(() => {
-      if (isPressed && Math.abs(position.x) < 5 && Math.abs(position.y) < 5) {
-        setIsLongPress(true)
+      if (mode === NavModes.IDLE && !hasMovedRef.current) {
+        setMode(NavModes.LONG_PRESS)
         triggerHaptic('heavy')
         if (onLongPress) onLongPress()
       }
-    }, 3000) // 3 seconds
-  }
+    }, LONG_PRESS_DURATION)
+  }, [mode, triggerHaptic, onLongPress])
 
-  const cancelLongPress = () => {
-    if (longPressTimerRef.current) {
+  // Handle touch/mouse start
+  const handleStart = useCallback((x: number, y: number) => {
+    // Reset state
+    setMode(NavModes.IDLE)
+    setIsPressed(true)
+    hasMovedRef.current = false
+    hasFiredSwipeRef.current = false
+    
+    // Record start position and time
+    touchStartRef.current = { x, y, time: Date.now() }
+    currentTouchRef.current = { x, y }
+    
+    // Start timers
+    startHoldTimer()
+    startLongPressTimer()
+    
+    // Haptic feedback
+    triggerHaptic('light')
+    
+    // Record press for sound
+    clickSoundManager.init()
+  }, [startHoldTimer, startLongPressTimer, triggerHaptic])
+
+  // Handle touch/mouse move
+  const handleMove = useCallback((x: number, y: number) => {
+    if (!isPressed) return
+    
+    currentTouchRef.current = { x, y }
+    const delta = getDelta()
+    const distance = getDistance()
+    
+    // Mark as moved if threshold exceeded
+    if (distance > 5) {
+      hasMovedRef.current = true
+      
+      // Cancel long press
+      if (longPressTimerRef.current !== undefined) {
+        clearTimeout(longPressTimerRef.current)
+        longPressTimerRef.current = undefined
+      }
+    }
+    
+    // Update visual position
+    updateVisualPosition(delta.x, delta.y)
+    
+    // Handle based on mode
+    switch (mode) {
+      case NavModes.IDLE:
+        checkSwipe()
+        break
+      case NavModes.CURSOR:
+        updateCursor()
+        break
+    }
+  }, [isPressed, mode, getDelta, getDistance, updateVisualPosition, checkSwipe, updateCursor])
+
+  // Handle touch/mouse end
+  const handleEnd = useCallback(() => {
+    if (!isPressed) return
+    
+    // Clear timers
+    if (holdTimerRef.current !== undefined) {
+      clearTimeout(holdTimerRef.current)
+      holdTimerRef.current = undefined
+    }
+    if (longPressTimerRef.current !== undefined) {
       clearTimeout(longPressTimerRef.current)
-      longPressTimerRef.current = null
-    }
-    setIsLongPress(false)
-  }
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
-    // Prevent if already pressed
-    if (isPressed) return
-    
-    setIsDragging(true)
-    setIsPressed(true)
-    triggerHaptic('medium')
-    
-    // Record press time and reset drag flag
-    pressTimeRef.current = Date.now()
-    hasDraggedRef.current = false
-    
-    const rect = nubRef.current!.getBoundingClientRect()
-    centerRef.current = {
-      x: rect.left + rect.width / 2,
-      y: rect.top + rect.height / 2
-    }
-    dragStartRef.current = { x: e.clientX, y: e.clientY }
-    
-    startTicking()
-    startLongPressTimer()
-  }
-
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
-    if (Math.abs(position.x) < 5 && Math.abs(position.y) < 5 && !isLongPress) {
-      triggerHaptic('heavy')
-      onClick()
-    }
-  }
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
-    // Prevent if already pressed
-    if (isPressed || isDragging) return
-    
-    const touch = e.touches[0]
-    setIsDragging(true)
-    setIsPressed(true)
-    triggerHaptic('medium')
-    
-    // Record press time and reset drag flag
-    pressTimeRef.current = Date.now()
-    hasDraggedRef.current = false
-    
-    // Use touch start position as center for more precise control
-    centerRef.current = {
-      x: touch.clientX,
-      y: touch.clientY
-    }
-    dragStartRef.current = { x: touch.clientX, y: touch.clientY }
-    
-    startTicking()
-    startLongPressTimer()
-  }
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return
-    e.preventDefault()
-    
-    const touch = e.touches[0]
-    
-    // Calculate delta from initial touch position
-    const deltaX = touch.clientX - centerRef.current.x
-    const deltaY = touch.clientY - centerRef.current.y
-    
-    // Cancel long press if moved too much
-    if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
-      cancelLongPress()
+      longPressTimerRef.current = undefined
     }
     
-    processInput(deltaX, deltaY)
-  }
-
-  const handleTouchEnd = () => {
-    cancelLongPress()
-    
-    // Only play sound if it was a quick press-release without dragging
-    const pressDuration = Date.now() - pressTimeRef.current
-    if (pressDuration < 500 && !hasDraggedRef.current && pressTimeRef.current > 0) {
+    // Play sound for quick taps
+    const duration = Date.now() - touchStartRef.current.time
+    if (duration < 500 && !hasMovedRef.current) {
       clickSoundManager.playClick()
     }
     
-    if (Math.abs(position.x) < 5 && Math.abs(position.y) < 5 && !isLongPress) {
+    // Handle click
+    if (mode === NavModes.IDLE && !hasMovedRef.current) {
       triggerHaptic('heavy')
       onClick()
     }
-    setIsDragging(false)
-    setPosition({ x: 0, y: 0 })
+    
+    // Reset state
+    setMode(NavModes.IDLE)
     setIsPressed(false)
-    lastDirectionRef.current = { x: 0, y: 0 }
-    stopTicking()
-    pressTimeRef.current = 0
-  }
+    setVisualPosition({ x: 0, y: 0 })
+    hasMovedRef.current = false
+    hasFiredSwipeRef.current = false
+  }, [isPressed, mode, onClick, triggerHaptic])
+
+  // Mouse event handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    handleStart(e.clientX, e.clientY)
+  }, [handleStart])
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    handleMove(e.clientX, e.clientY)
+  }, [handleMove])
+
+  const handleMouseUp = useCallback(() => {
+    handleEnd()
+  }, [handleEnd])
+
+  // Touch event handlers
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    e.preventDefault()
+    const touch = e.touches[0]
+    handleStart(touch.clientX, touch.clientY)
+  }, [handleStart])
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    e.preventDefault()
+    const touch = e.touches[0]
+    handleMove(touch.clientX, touch.clientY)
+  }, [handleMove])
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    e.preventDefault()
+    handleEnd()
+  }, [handleEnd])
+
+  // Setup global mouse listeners
+  useEffect(() => {
+    if (isPressed) {
+      window.addEventListener('mousemove', handleMouseMove)
+      window.addEventListener('mouseup', handleMouseUp)
+      
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove)
+        window.removeEventListener('mouseup', handleMouseUp)
+      }
+    }
+  }, [isPressed, handleMouseMove, handleMouseUp])
+
+  // Initialize sound on mount
+  useEffect(() => {
+    clickSoundManager.init()
+  }, [])
 
   return (
     <div 
-      className={`track-nub-container ${isDragging ? 'active' : ''} ${isPressed ? 'showing-zones' : ''} ${isLongPress ? 'long-press' : ''}`}
+      className={`track-nub-container ${isPressed ? 'active' : ''} ${mode === NavModes.LONG_PRESS ? 'long-press' : ''}`}
       onMouseDown={'ontouchstart' in window ? undefined : handleMouseDown}
-      onClick={'ontouchstart' in window ? undefined : handleClick}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -310,12 +328,15 @@ const TrackNub: React.FC<TrackNubProps> = ({ onDirectionInput, onClick, onLongPr
         ref={nubRef}
         className={`track-nub ${isPressed ? 'pressed' : ''}`}
         style={{
-          transform: `translate(${position.x}px, ${position.y}px) ${isPressed ? 'scale(0.98)' : 'scale(1)'}`,
+          transform: `translate(${visualPosition.x}px, ${visualPosition.y}px) ${isPressed ? 'scale(0.98)' : 'scale(1)'}`,
           pointerEvents: 'none'
         }}
       >
         <div className="nub-surface"></div>
       </div>
+      {mode === NavModes.CURSOR && (
+        <div className="cursor-mode-indicator">Cursor Mode</div>
+      )}
     </div>
   )
 }
