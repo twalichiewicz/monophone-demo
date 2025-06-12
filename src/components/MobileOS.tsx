@@ -223,7 +223,7 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, 
           </div>
           <div className="app-nav-bar">
             {getAppNavItems(apps[parseInt(openApp.split('-')[1])]?.name).map((item, index) => (
-              <div key={index} className="nav-item">
+              <div key={index} className="nav-item" tabIndex={0}>
                 <span className="nav-icon">{item.icon}</span>
                 <span className="nav-label">{item.label}</span>
               </div>

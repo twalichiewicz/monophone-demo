@@ -25,7 +25,11 @@ export const ClockUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
       </div>
       <div className="clock-actions">
         {buttons.map((button, i) => (
-          <div key={i} className={`clock-button ${i === selectedIndex ? 'selected' : ''}`}>
+          <div 
+            key={i} 
+            className={`clock-button ${i === selectedIndex ? 'selected' : ''}`}
+            tabIndex={0}
+          >
             {button}
           </div>
         ))}
@@ -55,7 +59,11 @@ export const MapsUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
       </div>
       <div className="map-quick-actions">
         {locations.map((loc, i) => (
-          <div key={i} className={`map-action ${i === mapIndex ? 'selected' : ''}`}>
+          <div 
+            key={i} 
+            className={`map-action ${i === mapIndex ? 'selected' : ''}`}
+            tabIndex={0}
+          >
             {loc}
           </div>
         ))}
@@ -76,7 +84,11 @@ export const PhotosUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
       </div>
       <div className="photos-grid">
         {photos.map((_, i) => (
-          <div key={i} className={`photo-item ${i === photoIndex ? 'selected' : ''}`}>
+          <div 
+            key={i} 
+            className={`photo-item ${i === photoIndex ? 'selected' : ''}`}
+            tabIndex={0}
+          >
             <div className="photo-placeholder">
               {i === photoIndex ? '🖼️' : ''}
             </div>
@@ -105,7 +117,11 @@ export const CameraUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
       <div className="camera-controls">
         <div className="camera-modes">
           {modes.map((mode, i) => (
-            <div key={i} className={`camera-mode ${i === modeIndex ? 'selected' : ''}`}>
+            <div 
+              key={i} 
+              className={`camera-mode ${i === modeIndex ? 'selected' : ''}`}
+              tabIndex={0}
+            >
               {mode}
             </div>
           ))}
@@ -145,7 +161,11 @@ export const WeatherUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
       </div>
       <div className="weather-forecast">
         {days.map((day, i) => (
-          <div key={i} className={`forecast-day ${i === selectedIndex ? 'selected' : ''}`}>
+          <div 
+            key={i} 
+            className={`forecast-day ${i === selectedIndex ? 'selected' : ''}`}
+            tabIndex={0}
+          >
             <div className="forecast-day-name">{day}</div>
             <div className="forecast-icon">☀️</div>
             <div className="forecast-temp">75°</div>
@@ -169,7 +189,11 @@ export const NotesUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
     <div className="notes-ui">
       <div className="notes-list">
         {notes.map((note, i) => (
-          <div key={i} className={`note-item ${i === noteIndex ? 'selected' : ''}`}>
+          <div 
+            key={i} 
+            className={`note-item ${i === noteIndex ? 'selected' : ''}`}
+            tabIndex={0}
+          >
             <div className="note-title">{note.title}</div>
             <div className="note-preview">{note.preview}</div>
             <div className="note-date">Today</div>
@@ -241,7 +265,11 @@ export const MailUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
       </div>
       <div className="mail-list">
         {emails.map((email, i) => (
-          <div key={i} className={`mail-item ${i === emailIndex ? 'selected' : ''}`}>
+          <div 
+            key={i} 
+            className={`mail-item ${i === emailIndex ? 'selected' : ''}`}
+            tabIndex={0}
+          >
             <div className="mail-from">{email.from}</div>
             <div className="mail-subject">{email.subject}</div>
             <div className="mail-preview">{email.preview}</div>
@@ -271,7 +299,11 @@ export const SettingsUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
       </div>
       <div className="settings-list">
         {settings.map((setting, i) => (
-          <div key={i} className={`setting-item ${i === settingIndex ? 'selected' : ''}`}>
+          <div 
+            key={i} 
+            className={`setting-item ${i === settingIndex ? 'selected' : ''}`}
+            tabIndex={0}
+          >
             <span className="setting-icon">{setting.icon}</span>
             <span className="setting-title">{setting.title}</span>
             {setting.value && <span className="setting-value">{setting.value}</span>}
@@ -300,7 +332,11 @@ export const MessagesUI: React.FC<AppUIProps> = ({ selectedIndex }) => {
       </div>
       <div className="conversations-list">
         {conversations.map((convo, i) => (
-          <div key={i} className={`conversation-item ${i === convoIndex ? 'selected' : ''}`}>
+          <div 
+            key={i} 
+            className={`conversation-item ${i === convoIndex ? 'selected' : ''}`}
+            tabIndex={0}
+          >
             <div className="convo-avatar">{convo.name[0]}</div>
             <div className="convo-details">
               <div className="convo-name">{convo.name}</div>

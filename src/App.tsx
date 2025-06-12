@@ -179,95 +179,129 @@ function App() {
   }
   
   const handleAppNavigation = (direction: 'up' | 'down' | 'left' | 'right') => {
-    // Get the current app index
-    const currentAppIndex = parseInt(openApp?.split('-')[1] || '0')
-    const appName = ['Clock', 'Maps', 'Photos', 'Camera', 'Weather', 'Notes', 'Music', 'Mail', 'Settings', 'Messages'][currentAppIndex]
+    // Get all focusable elements in the current app
+    const appContent = document.querySelector('.app-content')
+    const navBar = document.querySelector('.app-nav-bar')
     
-    // Different navigation logic for different apps
-    switch (appName) {
-      case 'Clock':
-        // Clock has 3 horizontal buttons
-        if (direction === 'left') {
-          setAppSelectedIndex(prev => prev > 0 ? prev - 1 : 2)
-        } else if (direction === 'right') {
-          setAppSelectedIndex(prev => prev < 2 ? prev + 1 : 0)
-        }
-        break
+    if (!appContent) return
+    
+    // Define selectors for focusable elements
+    const focusableSelectors = [
+      'button:not([disabled])',
+      'input:not([disabled])',
+      'textarea:not([disabled])',
+      'select:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])',
+      '.note-item',
+      '.mail-item',
+      '.conversation-item',
+      '.setting-item',
+      '.photo-item',
+      '.forecast-day',
+      '.map-action',
+      '.clock-button',
+      '.camera-mode',
+      '.control-btn',
+      '.nav-item'
+    ].join(', ')
+    
+    // Get all focusable elements from both app content and nav bar
+    const appFocusable = Array.from(appContent.querySelectorAll(focusableSelectors))
+    const navFocusable = navBar ? Array.from(navBar.querySelectorAll(focusableSelectors)) : []
+    const allFocusable = [...appFocusable, ...navFocusable]
+    
+    if (allFocusable.length === 0) return
+    
+    // Find currently selected element
+    const currentElement = allFocusable.find(el => 
+      el.classList.contains('selected') || 
+      el === document.activeElement
+    )
+    
+    const currentIndex = currentElement ? allFocusable.indexOf(currentElement) : -1
+    
+    // Calculate positions of all elements
+    const elementPositions = allFocusable.map(el => {
+      const rect = el.getBoundingClientRect()
+      return {
+        element: el,
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+        top: rect.top,
+        bottom: rect.bottom,
+        left: rect.left,
+        right: rect.right
+      }
+    })
+    
+    const currentPos = currentIndex >= 0 ? elementPositions[currentIndex] : null
+    let nextElement = null
+    let nextIndex = -1
+    
+    if (!currentPos) {
+      // No current selection, select first element
+      nextIndex = 0
+    } else {
+      // Find the best next element based on direction
+      const candidates = elementPositions.filter((pos, idx) => {
+        if (idx === currentIndex) return false
         
-      case 'Maps':
-        // Maps has 4 horizontal quick actions
-        if (direction === 'left') {
-          setAppSelectedIndex(prev => prev > 0 ? prev - 1 : 3)
-        } else if (direction === 'right') {
-          setAppSelectedIndex(prev => prev < 3 ? prev + 1 : 0)
+        switch (direction) {
+          case 'up':
+            return pos.y < currentPos.y - 10
+          case 'down':
+            return pos.y > currentPos.y + 10
+          case 'left':
+            return pos.x < currentPos.x - 10
+          case 'right':
+            return pos.x > currentPos.x + 10
+          default:
+            return false
         }
-        break
+      })
+      
+      if (candidates.length > 0) {
+        // Find the closest element in the given direction
+        const closest = candidates.reduce((best, pos) => {
+          const distance = Math.sqrt(
+            Math.pow(pos.x - currentPos.x, 2) + 
+            Math.pow(pos.y - currentPos.y, 2)
+          )
+          const bestDistance = Math.sqrt(
+            Math.pow(best.x - currentPos.x, 2) + 
+            Math.pow(best.y - currentPos.y, 2)
+          )
+          return distance < bestDistance ? pos : best
+        })
         
-      case 'Photos':
-        // Photos has a 3x4 grid
-        const photosPerRow = 3
-        const totalPhotos = 12
-        if (direction === 'up' && appSelectedIndex >= photosPerRow) {
-          setAppSelectedIndex(prev => prev - photosPerRow)
-        } else if (direction === 'down' && appSelectedIndex < totalPhotos - photosPerRow) {
-          setAppSelectedIndex(prev => prev + photosPerRow)
-        } else if (direction === 'left' && appSelectedIndex % photosPerRow !== 0) {
-          setAppSelectedIndex(prev => prev - 1)
-        } else if (direction === 'right' && appSelectedIndex % photosPerRow !== photosPerRow - 1 && appSelectedIndex < totalPhotos - 1) {
-          setAppSelectedIndex(prev => prev + 1)
-        }
-        break
-        
-      case 'Weather':
-        // Weather has 5 horizontal forecast days
-        if (direction === 'left') {
-          setAppSelectedIndex(prev => prev > 0 ? prev - 1 : 4)
-        } else if (direction === 'right') {
-          setAppSelectedIndex(prev => prev < 4 ? prev + 1 : 0)
-        }
-        break
-        
-      case 'Notes':
-      case 'Mail':
-      case 'Messages':
-        // These have vertical lists (4 items)
-        if (direction === 'up') {
-          setAppSelectedIndex(prev => prev > 0 ? prev - 1 : 3)
-        } else if (direction === 'down') {
-          setAppSelectedIndex(prev => prev < 3 ? prev + 1 : 0)
-        }
-        break
-        
-      case 'Music':
-        // Music has 3 horizontal controls
-        if (direction === 'left') {
-          setAppSelectedIndex(prev => prev > 0 ? prev - 1 : 2)
-        } else if (direction === 'right') {
-          setAppSelectedIndex(prev => prev < 2 ? prev + 1 : 0)
-        }
-        break
-        
-      case 'Settings':
-        // Settings has vertical list (6 items)
-        if (direction === 'up') {
-          setAppSelectedIndex(prev => prev > 0 ? prev - 1 : 5)
-        } else if (direction === 'down') {
-          setAppSelectedIndex(prev => prev < 5 ? prev + 1 : 0)
-        }
-        break
-        
-      case 'Camera':
-        // Camera has 4 horizontal modes
-        if (direction === 'left') {
-          setAppSelectedIndex(prev => prev > 0 ? prev - 1 : 3)
-        } else if (direction === 'right') {
-          setAppSelectedIndex(prev => prev < 3 ? prev + 1 : 0)
-        }
-        break
-        
-      default:
-        // Default behavior - just cycle
-        setAppSelectedIndex(prev => (prev + 1) % 10)
+        nextIndex = elementPositions.indexOf(closest)
+      }
+    }
+    
+    if (nextIndex >= 0 && nextIndex < allFocusable.length) {
+      // Remove selected class from all elements
+      allFocusable.forEach(el => el.classList.remove('selected'))
+      
+      // Add selected class to next element
+      nextElement = allFocusable[nextIndex]
+      nextElement.classList.add('selected')
+      
+      // Update the app selected index for compatibility
+      setAppSelectedIndex(nextIndex)
+      
+      // Scroll element into view if needed
+      const container = appContent
+      const rect = nextElement.getBoundingClientRect()
+      const containerRect = container.getBoundingClientRect()
+      
+      // Check if element is outside visible area
+      if (rect.top < containerRect.top || rect.bottom > containerRect.bottom - 90) {
+        nextElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center',
+          inline: 'center'
+        })
+      }
     }
   }
 

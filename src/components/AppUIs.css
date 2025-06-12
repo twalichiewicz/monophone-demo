@@ -815,3 +815,39 @@
 .send-btn:hover {
   background: #27ae60;
 }
+
+/* Universal selected state for navigation */
+.clock-button.selected,
+.map-action.selected,
+.photo-item.selected,
+.camera-mode.selected,
+.forecast-day.selected,
+.nav-item.selected {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+button.selected,
+input.selected,
+textarea.selected,
+.toolbar-btn.selected {
+  outline: 2px solid rgba(59, 130, 246, 0.8);
+  background-color: rgba(59, 130, 246, 0.2);
+}
+
+/* Ensure scrollable containers */
+.app-content {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.notes-list,
+.mail-list,
+.conversations-list,
+.settings-list {
+  overflow-y: auto;
+  max-height: calc(100vh - 300px);
+  scroll-behavior: smooth;
+}
