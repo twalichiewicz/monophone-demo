@@ -339,6 +339,9 @@ function App() {
         onLongPress={() => {
           setShowSpatialView(true)
         }}
+        onPress={() => {
+          clickSoundManager.playClick()
+        }}
       />
       {showSpatialView && (
         <SpatialView onClose={() => setShowSpatialView(false)} />
