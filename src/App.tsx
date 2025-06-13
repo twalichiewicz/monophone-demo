@@ -50,9 +50,9 @@ function App() {
         const distanceY = Math.abs(prev.y - trackpadCenterY);
         const radialDistance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
         
-        // Apply decreasing sensitivity based on distance (1.0 at center, 0.2 at edges)
-        const distanceFactor = Math.max(0.2, 1.0 - (radialDistance / 100));
-        const baseSensitivity = 0.25;
+        // Apply decreasing sensitivity based on distance (1.0 at center, 0.5 at edges)
+        const distanceFactor = Math.max(0.5, 1.0 - (radialDistance / 100));
+        const baseSensitivity = 1.0;
         const adjustedSensitivity = baseSensitivity * distanceFactor;
         
         const newX = Math.max(0, Math.min(100, prev.x + direction.x * adjustedSensitivity))
@@ -385,6 +385,27 @@ function App() {
 
     // Initialize click sound manager
     clickSoundManager.init()
+    
+    // Add global haptic feedback for all button/interactive element clicks
+    const handleGlobalClick = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement
+      if (target.closest('button, [data-selectable="true"], .app-icon, .dock-app, a, input[type="button"], input[type="submit"]')) {
+        // Test with direct vibration call
+        if ('vibrate' in navigator) {
+          navigator.vibrate(20)
+          console.log('Vibration triggered')
+        } else {
+          console.log('Vibration API not available')
+        }
+      }
+    }
+    
+    // Only use touchstart for mobile to avoid double triggers
+    if ('ontouchstart' in window) {
+      document.addEventListener('touchstart', handleGlobalClick, { passive: true })
+    } else {
+      document.addEventListener('click', handleGlobalClick)
+    }
 
     // Prevent touch scrolling
     const preventScroll = (e: TouchEvent) => {
@@ -396,6 +417,11 @@ function App() {
     return () => {
       document.removeEventListener('touchmove', preventScroll)
       window.removeEventListener('resize', checkMobile)
+      if ('ontouchstart' in window) {
+        document.removeEventListener('touchstart', handleGlobalClick)
+      } else {
+        document.removeEventListener('click', handleGlobalClick)
+      }
     }
   }, [])
 

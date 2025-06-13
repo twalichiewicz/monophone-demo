@@ -24,7 +24,8 @@ const SWIPE_THRESHOLD = 15 // pixels to trigger swipe
 const HOLD_DURATION = 150 // ms to enter cursor mode
 const LONG_PRESS_DURATION = 3000 // ms for long press
 const VISUAL_MAX_DISTANCE = 25 // max visual displacement
-const CURSOR_SENSITIVITY = 0.5 // cursor movement sensitivity
+const CURSOR_SENSITIVITY = 2.5 // cursor movement sensitivity
+const CURSOR_SMOOTHING = 0.85 // smoothing factor (0-1, higher = smoother)
 
 const TrackNub: React.FC<TrackNubProps> = ({ 
   onDirectionInput, 
@@ -39,6 +40,8 @@ const TrackNub: React.FC<TrackNubProps> = ({
   // Refs for gesture tracking
   const touchStartRef = useRef({ x: 0, y: 0, time: 0 })
   const currentTouchRef = useRef({ x: 0, y: 0 })
+  const lastCursorDeltaRef = useRef({ x: 0, y: 0 })
+  const smoothedDeltaRef = useRef({ x: 0, y: 0 })
   const hasMovedRef = useRef(false)
   const hasFiredSwipeRef = useRef(false)
   
@@ -124,15 +127,30 @@ const TrackNub: React.FC<TrackNubProps> = ({
     }
   }, [mode, getDelta, getDistance, onDirectionInput, triggerHaptic])
 
-  // Handle cursor mode
+  // Handle cursor mode with smoothing
   const updateCursor = useCallback(() => {
     if (mode !== NavModes.CURSOR) return
     
-    const delta = getDelta()
-    onDirectionInput({ 
-      x: delta.x * CURSOR_SENSITIVITY, 
-      y: delta.y * CURSOR_SENSITIVITY 
-    }, true)
+    const currentDelta = getDelta()
+    
+    // Calculate movement delta from last position
+    const movementX = currentDelta.x - lastCursorDeltaRef.current.x
+    const movementY = currentDelta.y - lastCursorDeltaRef.current.y
+    
+    // Apply exponential smoothing
+    smoothedDeltaRef.current.x = smoothedDeltaRef.current.x * CURSOR_SMOOTHING + movementX * (1 - CURSOR_SMOOTHING)
+    smoothedDeltaRef.current.y = smoothedDeltaRef.current.y * CURSOR_SMOOTHING + movementY * (1 - CURSOR_SMOOTHING)
+    
+    // Send smoothed movement
+    if (Math.abs(smoothedDeltaRef.current.x) > 0.01 || Math.abs(smoothedDeltaRef.current.y) > 0.01) {
+      onDirectionInput({ 
+        x: smoothedDeltaRef.current.x * CURSOR_SENSITIVITY, 
+        y: smoothedDeltaRef.current.y * CURSOR_SENSITIVITY 
+      }, true)
+    }
+    
+    // Update last position
+    lastCursorDeltaRef.current = currentDelta
   }, [mode, getDelta, onDirectionInput])
 
   // Start hold timer
@@ -145,11 +163,17 @@ const TrackNub: React.FC<TrackNubProps> = ({
       if (mode === NavModes.IDLE && !hasFiredSwipeRef.current) {
         setMode(NavModes.CURSOR)
         triggerHaptic('light')
+        
+        // Reset cursor tracking
+        const currentDelta = getDelta()
+        lastCursorDeltaRef.current = currentDelta
+        smoothedDeltaRef.current = { x: 0, y: 0 }
+        
         // Send initial cursor position to show cursor
         onDirectionInput({ x: 0, y: 0 }, true)
       }
     }, HOLD_DURATION)
-  }, [mode, triggerHaptic, onDirectionInput])
+  }, [mode, triggerHaptic, onDirectionInput, getDelta])
 
   // Start long press timer
   const startLongPressTimer = useCallback(() => {
@@ -254,6 +278,8 @@ const TrackNub: React.FC<TrackNubProps> = ({
     setVisualPosition({ x: 0, y: 0 })
     hasMovedRef.current = false
     hasFiredSwipeRef.current = false
+    lastCursorDeltaRef.current = { x: 0, y: 0 }
+    smoothedDeltaRef.current = { x: 0, y: 0 }
   }, [isPressed, mode, onClick, triggerHaptic])
 
   // Mouse event handlers

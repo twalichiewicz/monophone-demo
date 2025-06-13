@@ -307,6 +307,15 @@ export const SettingsUI: React.FC<AppUIProps> = () => {
     { icon: '♿', title: 'Accessibility', value: '' }
   ]
   
+  const testVibration = () => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate([100, 50, 100])
+      alert('Vibration triggered! If you didn\'t feel it, check:\n• Silent mode is off\n• Browser has permission\n• Not in power saving mode')
+    } else {
+      alert('Vibration API not supported on this device/browser.\n\nNote: iOS Safari does not support vibration.')
+    }
+  }
+  
   return (
     <div className="settings-ui">
       <div className="settings-header">
@@ -320,6 +329,7 @@ export const SettingsUI: React.FC<AppUIProps> = () => {
             data-selectable="true"
             className="setting-item"
             tabIndex={0}
+            onClick={setting.title === 'Sound & Haptics' ? testVibration : undefined}
           >
             <span className="setting-icon">{setting.icon}</span>
             <span className="setting-title">{setting.title}</span>
@@ -327,6 +337,21 @@ export const SettingsUI: React.FC<AppUIProps> = () => {
             <span className="setting-arrow">›</span>
           </div>
         ))}
+        
+        <div className="settings-section-header">Developer Options</div>
+        
+        <div 
+          id="settings-test-vibration"
+          data-selectable="true"
+          className="setting-item"
+          tabIndex={0}
+          onClick={testVibration}
+        >
+          <span className="setting-icon">📳</span>
+          <span className="setting-title">Test Vibration</span>
+          <span className="setting-value">Tap to test</span>
+          <span className="setting-arrow">›</span>
+        </div>
       </div>
     </div>
   )

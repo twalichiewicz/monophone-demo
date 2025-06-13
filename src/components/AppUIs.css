@@ -696,6 +696,17 @@
   opacity: 0.4;
 }
 
+.settings-section-header {
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 /* Messages App */
 .messages-ui {
   display: flex;
