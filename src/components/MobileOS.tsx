@@ -187,9 +187,9 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, 
       <div className="status-bar">
         <div className="status-time">{currentTime}</div>
         <div className="status-icons">
-          <span className="signal">📶</span>
-          <span className="wifi">📶</span>
-          <span className="battery">🔋</span>
+          <span className="signal">•••</span>
+          <span className="wifi">))))</span>
+          <span className="battery">100%</span>
         </div>
       </div>
       
@@ -229,7 +229,10 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, 
         {apps.map((app, index) => (
           <div
             key={index}
-            className={`app-icon ${hoveredIndex === index || selectedIndex === index ? 'selected' : ''} ${
+            className={`app-icon ${
+              cursorVisible && hoveredIndex === index ? 'selected' : 
+              !cursorVisible && selectedIndex === index ? 'selected' : ''
+            } ${
               selectedIndex === index && isPressed ? 'pressed' : ''
             } ${selectedIndex === index && isAnimating ? 'launching' : ''}`}
             style={{
@@ -259,7 +262,7 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, 
                 onClick={onCloseApp} 
                 data-selectable="true"
               >
-                <span className="close-icon">✕</span>
+                <span className="close-icon">×</span>
                 <span className="close-text">Close</span>
               </button>
             </div>
@@ -272,23 +275,28 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, 
           <div className="app-content">
             {renderAppUI(parseInt(openApp.split('-')[1]))}
           </div>
-          <div className="app-nav-bar">
-            {getAppNavItems(
-              parseInt(openApp.split('-')[1]) >= 12 
-                ? dockApps[parseInt(openApp.split('-')[1]) - 12]?.name
-                : apps[parseInt(openApp.split('-')[1])]?.name
-            ).map((item, index) => (
-              <div 
-                key={index} 
-                id={`nav-item-${index}`}
-                className="nav-item" 
-                data-selectable="true"
-              >
-                <span className="nav-icon">{item.icon}</span>
-                <span className="nav-label">{item.label}</span>
-              </div>
-            ))}
-          </div>
+          {getAppNavItems(
+            parseInt(openApp.split('-')[1]) >= 12 
+              ? dockApps[parseInt(openApp.split('-')[1]) - 12]?.name
+              : apps[parseInt(openApp.split('-')[1])]?.name
+          ).length > 0 && (
+            <div className="floating-options">
+              {getAppNavItems(
+                parseInt(openApp.split('-')[1]) >= 12 
+                  ? dockApps[parseInt(openApp.split('-')[1]) - 12]?.name
+                  : apps[parseInt(openApp.split('-')[1])]?.name
+              ).map((item, index) => (
+                <div 
+                  key={index} 
+                  id={`floating-option-${index}`}
+                  className="floating-option" 
+                  data-selectable="true"
+                >
+                  {item.label}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
       
@@ -297,7 +305,10 @@ const MobileOS: React.FC<MobileOSProps> = ({ selectedIndex, isPressed, openApp, 
           {dockApps.map((app, index) => (
             <div
               key={index}
-              className={`dock-item dock-app ${hoveredIndex === 12 + index || selectedIndex === 12 + index ? 'selected' : ''} ${
+              className={`dock-item dock-app ${
+                cursorVisible && hoveredIndex === 12 + index ? 'selected' : 
+                !cursorVisible && selectedIndex === 12 + index ? 'selected' : ''
+              } ${
                 selectedIndex === 12 + index && isPressed ? 'pressed' : ''
               }`}
               style={{

@@ -97,9 +97,7 @@ export const PhotosUI: React.FC<AppUIProps> = () => {
             className="photo-item"
             tabIndex={0}
           >
-            <div className="photo-placeholder">
-              🖼️
-            </div>
+            <div className="photo-placeholder"></div>
           </div>
         ))}
       </div>
@@ -156,7 +154,7 @@ export const WeatherUI: React.FC<AppUIProps> = () => {
         <div className="weather-location">San Francisco</div>
         <div className="weather-temp">72°</div>
         <div className="weather-condition">Partly Cloudy</div>
-        <div className="weather-icon">⛅</div>
+        <div className="weather-icon">☁</div>
       </div>
       <div className="weather-details">
         <div className="weather-detail">
@@ -182,7 +180,7 @@ export const WeatherUI: React.FC<AppUIProps> = () => {
             tabIndex={0}
           >
             <div className="forecast-day-name">{day}</div>
-            <div className="forecast-icon">☀️</div>
+            <div className="forecast-icon">☀</div>
             <div className="forecast-temp">75°</div>
           </div>
         ))}
@@ -239,7 +237,7 @@ export const MusicUI: React.FC<AppUIProps> = () => {
   return (
     <div className="music-ui">
       <div className="album-art">
-        <div className="album-placeholder">🎵</div>
+        <div className="album-placeholder"></div>
       </div>
       <div className="track-info">
         <div className="track-title">Awesome Song</div>
@@ -255,9 +253,9 @@ export const MusicUI: React.FC<AppUIProps> = () => {
         </div>
       </div>
       <div className="playback-controls">
-        <button id="music-previous" data-selectable="true" className="control-btn">⏮</button>
-        <button id="music-play" data-selectable="true" className="control-btn play">▶️</button>
-        <button id="music-next" data-selectable="true" className="control-btn">⏭</button>
+        <button id="music-previous" data-selectable="true" className="control-btn">◀</button>
+        <button id="music-play" data-selectable="true" className="control-btn play">▶</button>
+        <button id="music-next" data-selectable="true" className="control-btn">▶</button>
       </div>
     </div>
   )
@@ -397,7 +395,7 @@ export const MessagesUI: React.FC<AppUIProps> = () => {
           placeholder="Type a message..." 
           className="message-input" 
         />
-        <button id="messages-send" data-selectable="true" className="send-btn">→</button>
+        <button id="messages-send" data-selectable="true" className="send-btn">Send</button>
       </div>
     </div>
   )
@@ -413,10 +411,10 @@ export const PhoneUI: React.FC<AppUIProps> = () => {
   return (
     <div className="phone-ui">
       <div className="phone-tabs">
-        <div id="phone-favorites" data-selectable="true" className="phone-tab">⭐ Favorites</div>
-        <div id="phone-recents" data-selectable="true" className="phone-tab active">🕐 Recents</div>
-        <div id="phone-contacts" data-selectable="true" className="phone-tab">👤 Contacts</div>
-        <div id="phone-keypad" data-selectable="true" className="phone-tab">🔢 Keypad</div>
+        <div id="phone-favorites" data-selectable="true" className="phone-tab">Favorites</div>
+        <div id="phone-recents" data-selectable="true" className="phone-tab active">Recents</div>
+        <div id="phone-contacts" data-selectable="true" className="phone-tab">Contacts</div>
+        <div id="phone-keypad" data-selectable="true" className="phone-tab">Keypad</div>
       </div>
       
       <div className="phone-content">
@@ -429,13 +427,13 @@ export const PhoneUI: React.FC<AppUIProps> = () => {
               className="call-item"
             >
               <div className={`call-icon ${call.type}`}>
-                {call.type === 'missed' ? '📵' : call.type === 'outgoing' ? '📱' : '📞'}
+                {call.type === 'missed' ? '✕' : call.type === 'outgoing' ? '↗' : '↙'}
               </div>
               <div className="call-info">
                 <div className="call-name">{call.name || call.number}</div>
                 <div className="call-time">{call.time}</div>
               </div>
-              <div id={`call-action-${i}`} data-selectable="true" className="call-action">ℹ️</div>
+              <div id={`call-action-${i}`} data-selectable="true" className="call-action">i</div>
             </div>
           ))}
         </div>
@@ -443,7 +441,7 @@ export const PhoneUI: React.FC<AppUIProps> = () => {
       
       <div className="phone-dial-button">
         <div id="phone-dial" data-selectable="true" className="dial-button">
-          📞
+          +
         </div>
       </div>
     </div>
@@ -452,10 +450,10 @@ export const PhoneUI: React.FC<AppUIProps> = () => {
 
 export const SafariUI: React.FC<AppUIProps> = () => {
   const bookmarks = [
-    { name: 'Google', url: 'google.com', icon: '🔍' },
-    { name: 'YouTube', url: 'youtube.com', icon: '📺' },
-    { name: 'GitHub', url: 'github.com', icon: '💻' },
-    { name: 'Twitter', url: 'twitter.com', icon: '🐦' }
+    { name: 'Google', url: 'google.com', icon: 'G' },
+    { name: 'YouTube', url: 'youtube.com', icon: 'Y' },
+    { name: 'GitHub', url: 'github.com', icon: 'H' },
+    { name: 'Twitter', url: 'twitter.com', icon: 'X' }
   ]
   
   const suggestions = [
@@ -508,7 +506,7 @@ export const SafariUI: React.FC<AppUIProps> = () => {
                 data-selectable="true"
                 className="suggestion-item"
               >
-                🔍 {suggestion}
+                {suggestion}
               </div>
             ))}
           </div>
@@ -516,9 +514,9 @@ export const SafariUI: React.FC<AppUIProps> = () => {
       </div>
       
       <div className="safari-toolbar">
-        <div id="safari-share" data-selectable="true" className="toolbar-button">↗️</div>
-        <div id="safari-bookmarks" data-selectable="true" className="toolbar-button">📚</div>
-        <div id="safari-tabs" data-selectable="true" className="toolbar-button">⧉</div>
+        <div id="safari-share" data-selectable="true" className="toolbar-button">Share</div>
+        <div id="safari-bookmarks" data-selectable="true" className="toolbar-button">Books</div>
+        <div id="safari-tabs" data-selectable="true" className="toolbar-button">Tabs</div>
       </div>
     </div>
   )

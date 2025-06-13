@@ -65,6 +65,10 @@ function App() {
       return
     }
     
+    // Switching to swipe mode - clear cursor state
+    setCursorVisible(false)
+    setHoveredIndex(null)
+    
     // Handle omnidirectional navigation with cooldown (legacy mode)
     const now = Date.now()
     if (now - lastNavTimeRef.current < navCooldown) return
@@ -153,8 +157,8 @@ function App() {
     // Sound is now played in TrackNub on press, not on click
     
     if (!openApp) {
-      // On springboard - open app based on hovered index
-      const indexToOpen = hoveredIndex !== null ? hoveredIndex : selectedIndex
+      // On springboard - open app based on current mode
+      const indexToOpen = cursorVisible && hoveredIndex !== null ? hoveredIndex : selectedIndex
       
       if (indexToOpen === 10) {
         setIsFlipped(!isFlipped)

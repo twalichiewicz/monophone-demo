@@ -347,7 +347,7 @@
   flex-direction: column;
   color: white;
   overflow: hidden;
-  padding-bottom: 90px; /* Space for nav bar */
+  padding-bottom: 160px; /* Space for floating options panel (50px height + 110px bottom + spacing) */
   height: 100%;
 }
 
@@ -361,66 +361,7 @@
   opacity: 0.8;
 }
 
-/* App navigation bar */
-.app-nav-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 90px;
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  z-index: 100;
-  padding: 0 10px;
-  padding-right: 100px; /* Account for nub space + padding */
-}
-
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  padding: 8px 12px;
-  border-radius: 10px;
-  min-width: 50px;
-  flex: 1;
-  max-width: 80px;
-}
-
-.nav-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.nav-item:active {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(0.95);
-}
-
-.nav-item.selected {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.05);
-  outline: 2px solid rgba(255, 255, 255, 0.8);
-  outline-offset: 2px;
-}
-
-.nav-icon {
-  font-size: 24px;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.nav-label {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.7);
-  font-weight: 500;
-}
+/* Removed old app navigation bar styles - now using floating options panel */
 
 /* Ensure selected styling is scoped properly */
 .app-screen .selected {

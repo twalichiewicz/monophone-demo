@@ -14,7 +14,8 @@
       "Bash(rm:*)",
       "Bash(npm install:*)",
       "Bash(grep:*)",
-      "Bash(ffmpeg:*)"
+      "Bash(ffmpeg:*)",
+      "Bash(npm run lint)"
     ],
     "deny": []
   }
